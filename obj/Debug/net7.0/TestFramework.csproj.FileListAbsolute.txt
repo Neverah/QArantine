@@ -1,0 +1,14 @@
+D:\Dev\CS\TestFramework\bin\Debug\net7.0\TestFramework.exe
+D:\Dev\CS\TestFramework\bin\Debug\net7.0\TestFramework.deps.json
+D:\Dev\CS\TestFramework\bin\Debug\net7.0\TestFramework.runtimeconfig.json
+D:\Dev\CS\TestFramework\bin\Debug\net7.0\TestFramework.dll
+D:\Dev\CS\TestFramework\bin\Debug\net7.0\TestFramework.pdb
+D:\Dev\CS\TestFramework\obj\Debug\net7.0\TestFramework.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dev\CS\TestFramework\obj\Debug\net7.0\TestFramework.AssemblyInfoInputs.cache
+D:\Dev\CS\TestFramework\obj\Debug\net7.0\TestFramework.AssemblyInfo.cs
+D:\Dev\CS\TestFramework\obj\Debug\net7.0\TestFramework.csproj.CoreCompileInputs.cache
+D:\Dev\CS\TestFramework\obj\Debug\net7.0\TestFramework.dll
+D:\Dev\CS\TestFramework\obj\Debug\net7.0\refint\TestFramework.dll
+D:\Dev\CS\TestFramework\obj\Debug\net7.0\TestFramework.pdb
+D:\Dev\CS\TestFramework\obj\Debug\net7.0\TestFramework.genruntimeconfig.cache
+D:\Dev\CS\TestFramework\obj\Debug\net7.0\ref\TestFramework.dll
