@@ -1,17 +1,15 @@
-﻿using TestFramework.Code.Modules.TestLauncher;
+﻿using TestFramework.Code.FrameworkModules;
 class Program
 {
     static void Main(string[] args)
     {
         // Verificar si se proporcionó al menos un argumento
-        if (args.Length > 0)
+        if (args.Length <= 0)
         {
-            TestLauncher testLauncher = new();
-            testLauncher.LaunchTest(args[0]);
+            LogManager.LogError("Por favor, proporciona el nombre de la clase del test que quieres ejecutar como parámetro de entrada.");
+            return;
         }
-        else
-        {
-            Console.WriteLine("Por favor, proporciona un nombre de test como argumento de consola.");
-        }
+        
+        TestManager.Instance.LaunchTest(args[0]);
     }
 }

@@ -2,41 +2,39 @@ namespace TestFramework.Code
 {
     namespace Test
     {
+        using TestFramework.Code.FrameworkModules;
         using TestFlowGraph = Dictionary<string, Func<(String, int)>>;
         public abstract class FrameworkTest
         {
-            private string State { get; set; }
-            private bool Paused { get; set; }
-            private float Timeout { get; set; }
+            public bool Paused { get; set; }
+            public float Timeout { get; set; }
+            public string State { get; set; }
+            public string Name { get; }
+            public string CurrentTestCase { get; set; }
+            public string CurrentTestStep { get; set; }
 
             protected TestFlowGraph flowGraph;
 
             public FrameworkTest()
             {
-                State = "Executing";
-                Paused = false;
-                Timeout = 30f;
+                this.Name = this.GetType().Name;
 
-                flowGraph = CreateFlowGraph();
+                this.Paused = false;
+                this.Timeout = 30f;
+
+                this.State = "Executing";
+                this.CurrentTestCase = "";
+                this.CurrentTestStep = "";
+
+                this.flowGraph = CreateFlowGraph();
             }
 
             public void Launch()
             {
-                Console.WriteLine($"Comenzando la ejecución del test: {this.GetType().Name}");
+                LogManager.LogOK($"Comenzando la ejecución del test: {this.Name}");
 
-                // Crea un diccionario de funciones utilizando una clave de tipo string
-                Dictionary<string, Func<int, int, int>> functionDictionary = new Dictionary<string, Func<int, int, int>>
-                {
-                    { "sumar", (a, b) => a + b },
-                    { "restar", (a, b) => a - b }
-                };
-
-                // Llama a las funciones usando la clave
-                int resultado1 = functionDictionary["sumar"](5, 3);
-                int resultado2 = functionDictionary["restar"](10, 4);
-
-                Console.WriteLine($"Resultado de sumar: {resultado1}");
-                Console.WriteLine($"Resultado de restar: {resultado2}");
+                OnTestStart();
+                StartExecutionLoop();
             }
 
             protected TestFlowGraph CreateFlowGraph()
@@ -45,18 +43,53 @@ namespace TestFramework.Code
                 {
                     { "Init", () => 
                         {
-                            Console.WriteLine($"Comenzando el flujo de ejecución del test: {this.GetType().Name}");
+                            LogManager.LogOK($"Comenzando el flujo de ejecución del test: {this.Name}");
                             return ("End", 3);
                         } 
                     },
 
                     { "End", () => 
                         {
-                            Console.WriteLine($"Fin del flujo de ejecución del test: {this.GetType().Name}");
+                            LogManager.LogOK($"Fin del flujo de ejecución del test: {this.Name}");
                             return ("", 0);
                         } 
                     },
                 };
+            }
+
+            protected void LoadRequiredData()
+            {
+                LogManager.LogOK($"Cargando los datos para el test: {this.Name}");
+
+            }
+            protected void CreateTestCasesList()
+            {
+
+            }
+
+            protected void RecoverStateFromPreviousExecution()
+            {
+
+            }
+
+            protected void SetTestPreconditions()
+            {
+
+            }
+
+            protected void OnTestStart()
+            {
+
+            }
+
+            protected void OnTestEnd()
+            {
+                
+            }
+
+            private void StartExecutionLoop()
+            {
+
             }
         }
     }
