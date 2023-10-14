@@ -1,0 +1,36 @@
+
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    /* Estilo para los párrafos */
+                    p {
+                        margin: 5px 0;
+                        font-size: 14px;
+                        font-weight: bold;
+                        font-family: 'Arial', sans-serif;
+                    }
+                    /* Estilo del fondo */
+                    body { background-color: #111; color: white; }
+                    /* Estilos para los diferentes tags de logs */
+                    .error { color: rgb(220, 90, 90); }
+                    .ok { color: rgb(20, 140, 20); }
+                    .warning { color: rgb(220, 180, 80) }
+                    .debug { color: rgb(230, 230, 230); }
+                    .test-log-prefix { color: rgb(100, 100, 240); }
+                    .time-tag { color: rgb(160, 160, 160); }
+                </style>
+            </head>
+            <body>
+<p class='error'><span class='time-tag'>|0,01| </span><span class='test-log-prefix'></span> [ERROR] No se ha encontrado un test con la clase indicada: TestFramework.FrameworkTests.owo</p>
+<p class='debug'><span class='time-tag'>|0,01| </span>Call Stack:
+{</p>
+<p class='debug'><span class='time-tag'>|0,01| </span>	- TestFramework.Code.FrameworkModules.LogManager.PrintCallStack</p>
+<p class='debug'><span class='time-tag'>|0,01| </span>	- TestFramework.Code.FrameworkModules.LogManager.LogError</p>
+<p class='debug'><span class='time-tag'>|0,01| </span>	- TestFramework.Code.FrameworkModules.TestManager.LaunchTest</p>
+<p class='debug'><span class='time-tag'>|0,01| </span>	- Program.Main</p>
+<p class='debug'><span class='time-tag'>|0,01| </span>}</p>
+<p class='warning'><span class='time-tag'>|0,01| </span><span class='test-log-prefix'>&lt;illo:mondongo&gt;</span> [WARNING] Mirate esta Ivan</p>
+<p class='ok'><span class='time-tag'>|0,01| </span>Cerrando el log...</p>
+</body>
+</html>

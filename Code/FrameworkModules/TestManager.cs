@@ -5,6 +5,7 @@ namespace TestFramework.Code.FrameworkModules
 {
     public class TestManager
     {
+        public const string OUTPUT_DIRECTORY = "TestOutput";
         public FrameworkTest? CurrentTest { get; set; }
 
         private static TestManager? _instance;
@@ -21,8 +22,11 @@ namespace TestFramework.Code.FrameworkModules
             }
         }
 
-        public void LaunchTest(String testClassName)
+        public void LaunchTest(string testClassName)
         {
+            CreateTestDirectories();
+            LogManager.StartTestLogFile(testClassName);
+
             if (testClassName == null)
             {
                 LogManager.LogError($"No se ha indicado la clase del test que se quiere ejecutar");
@@ -48,6 +52,11 @@ namespace TestFramework.Code.FrameworkModules
             LogManager.LogOK($"Se va a ejecutar el test: {testClassName}");
             CurrentTest = testInstance;
             testLaunchMethod.Invoke(testInstance, null);
+        }
+
+        private static void CreateTestDirectories()
+        {
+            Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, OUTPUT_DIRECTORY));
         }
     }
 }
