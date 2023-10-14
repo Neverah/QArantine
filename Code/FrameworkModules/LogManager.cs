@@ -28,7 +28,7 @@ namespace TestFramework.Code.FrameworkModules
             {
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.Red;
-                LogManager.WriteTestLog($"[ERROR] {message}", LogLevel.Error);
+                WriteTestLog($"[ERROR] {message}", LogLevel.Error);
             }
 
             if (LogLvl >= LogLevel.Debug) PrintCallStack();
@@ -40,7 +40,7 @@ namespace TestFramework.Code.FrameworkModules
             {
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.Green;
-                LogManager.WriteTestLog($"[OK] {message}", LogLevel.OK);
+                WriteTestLog($"[OK] {message}", LogLevel.OK);
             }
         }
 
@@ -50,7 +50,7 @@ namespace TestFramework.Code.FrameworkModules
             {
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
-                LogManager.WriteTestLog($"[WARNING] {message}", LogLevel.Warning);
+                WriteTestLog($"[WARNING] {message}", LogLevel.Warning);
             }
         }
 
@@ -60,7 +60,7 @@ namespace TestFramework.Code.FrameworkModules
             {
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.White;
-                LogManager.WriteTestLog($"[DEBUG] {message}", LogLevel.Debug);
+                WriteTestLog($"[DEBUG] {message}", LogLevel.Debug);
             }
         }
 
@@ -69,14 +69,14 @@ namespace TestFramework.Code.FrameworkModules
             StackTrace stackTrace = new();
 
             Console.ForegroundColor = ConsoleColor.White;
-            LogManager.WriteTestLog("Call Stack:\n{", LogLevel.Debug, false);
+            WriteTestLog("Call Stack:\n{", LogLevel.Debug, false);
             for (int i = 0; i < stackTrace.FrameCount; i++)
             {
                 StackFrame? frame = stackTrace.GetFrame(i);
                 MethodBase? method = frame.GetMethod();
-                LogManager.WriteTestLog($"\t- {method?.DeclaringType}.{method?.Name}", LogLevel.Debug, false);
+                WriteTestLog($"\t- {method?.DeclaringType}.{method?.Name}", LogLevel.Debug, false);
             }
-            LogManager.WriteTestLog("}", LogLevel.Debug, false);
+            WriteTestLog("}", LogLevel.Debug, false);
         }
 
         private static void PrintConsoleLogTestPrefix()
@@ -89,10 +89,10 @@ namespace TestFramework.Code.FrameworkModules
 
         private static string GetLogTestPrefix(bool isForHTML = false)
         {
-            if (TestManager?.CurrentTest != null && TestManager?.CurrentTest?.CurrentTestCase != "")
+            if (TestManager?.CurrentTest != null && TestManager?.CurrentTest?.CurrentTestCase != null)
             {
-                if (isForHTML) return $"<{TestManager?.CurrentTest.CurrentTestCase}:{TestManager?.CurrentTest.CurrentTestStep}>";
-                else return $"&lt;{TestManager?.CurrentTest.CurrentTestCase}:{TestManager?.CurrentTest.CurrentTestStep}&gt;";
+                if (isForHTML) return $"&lt;{TestManager?.CurrentTest.CurrentTestCase.ID}:{TestManager?.CurrentTest.CurrentTestCase.CurrentStep}&gt; ";
+                else return $"<{TestManager?.CurrentTest.CurrentTestCase.ID}:{TestManager?.CurrentTest.CurrentTestCase.CurrentStep}> ";
             }
             return "";
         }
