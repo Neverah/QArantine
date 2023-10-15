@@ -1,0 +1,67 @@
+
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    /* Estilo para los párrafos */
+                    p {
+                        margin: 5px 0;
+                        font-size: 13px;
+                        font-weight: bold;
+                        font-family: 'Arial', sans-serif;
+                    }
+                    /* Estilo del fondo */
+                    body { background-color: #111; color: white; }
+                    /* Estilos para los diferentes tags de logs */
+                    .error { color: rgb(220, 69, 69); }
+                    .ok { color: rgb(60, 185, 60); }
+                    .warning { color: rgb(220, 180, 80) }
+                    .debug { color: rgb(230, 230, 230); }
+                    .test-log-prefix { color: rgb(160, 100, 220); }
+                    .time-tag { color: rgb(160, 160, 160); }
+                </style>
+            </head>
+            <body>
+<p class='ok'><span class='time-tag'>|0,02| </span>[OK] Se va a crear un nuevo Thread para ejecutar el test: DefaultTest</p>
+<p class='ok'><span class='time-tag'>|0,03| </span>[OK] Se va a crear un nuevo Thread para gestionar el timeout del test: DefaultTest</p>
+<p class='ok'><span class='time-tag'>|0,03| </span><span class='test-log-prefix'></span> [OK] > Cargando los datos para el test: 'DefaultTest'</p>
+<p class='ok'><span class='time-tag'>|0,03| </span><span class='test-log-prefix'></span> [OK] > Creando la lista de casos de prueba del test: 'DefaultTest'</p>
+<p class='ok'><span class='time-tag'>|0,03| </span><span class='test-log-prefix'></span> [OK] > Recuperando el estado tras una posible ejecución anterior: 'DefaultTest'</p>
+<p class='ok'><span class='time-tag'>|0,03| </span><span class='test-log-prefix'></span> [OK] > Eliminando el directorio de /Ouput de una ejecucion anterior del test: 'DefaultTest'</p>
+<p class='ok'><span class='time-tag'>|0,03| </span><span class='test-log-prefix'></span> [OK] > Creando los directorios necesarios para el test: 'DefaultTest'</p>
+<p class='ok'><span class='time-tag'>|0,03| </span><span class='test-log-prefix'></span> [OK] > Estableciendo las precondiciones del test: 'DefaultTest'</p>
+<p class='ok'><span class='time-tag'>|0,03| </span><span class='test-log-prefix'></span> [OK] > Iniciando el test: 'DefaultTest'</p>
+<p class='ok'><span class='time-tag'>|0,03| </span><span class='test-log-prefix'></span> [OK] > Van a comenzar a probarse todos los casos de prueba del test: 'DefaultTest'</p>
+<p class='ok'><span class='time-tag'>|0,03| </span><span class='test-log-prefix'>&lt;TestCaseExample1:Init&gt; </span> [OK] Comenzando el caso de prueba: 'TestCaseExample1'</p>
+<p class='ok'><span class='time-tag'>|0,03| </span><span class='test-log-prefix'>&lt;TestCaseExample1:Introduction&gt; </span> [OK] Este es el primer Step del caso de prueba</p>
+<p class='ok'><span class='time-tag'>|0,03| </span><span class='test-log-prefix'>&lt;TestCaseExample1:Introduction&gt; </span> [OK] Deberías probar a implementar tu propio test creandole un grafo de flujo que cumpla tus necesidades</p>
+<p class='ok'><span class='time-tag'>|0,04| </span><span class='test-log-prefix'>&lt;TestCaseExample1:ErrorReportExample&gt; </span> [OK] Este es el segundo Step del caso de prueba</p>
+<p class='ok'><span class='time-tag'>|0,04| </span><span class='test-log-prefix'>&lt;TestCaseExample1:ErrorReportExample&gt; </span> [OK] Se va a reportar un error simple sin campos adicionales como ejemplo:</p>
+<p class='error'><span class='time-tag'>|0,04| </span><span class='test-log-prefix'>&lt;TestCaseExample1:ErrorReportExample&gt; </span> [ERROR] TEST ERROR DETECTED > EXAMPLE_OF_SIMPLE_ERROR;DefaultTest;TestCaseExample1;ErrorReportExample</p>
+<p class='ok'><span class='time-tag'>|0,04| </span><span class='test-log-prefix'>&lt;TestCaseExample1:ErrorReportExample&gt; </span> [OK] Se va a reportar un error extendido con campos adicionales como ejemplo:</p>
+<p class='error'><span class='time-tag'>|0,05| </span><span class='test-log-prefix'>&lt;TestCaseExample1:ErrorReportExample&gt; </span> [ERROR] TEST ERROR DETECTED > EXAMPLE_OF_EXTENDED_ERROR;DefaultTest;TestCaseExample1;ErrorReportExample > Today Date: 2023-10-15 23:49:04;1 + 1: 2;Value Of PI: 3,141592653589793;Roses are: Blue</p>
+<p class='ok'><span class='time-tag'>|0,05| </span><span class='test-log-prefix'>&lt;TestCaseExample1:ErrorReportExample&gt; </span> [OK] Dos errores en un mismo TestCase y con todos sus campos iguales (ignorando el Step) se consideran iguales, y se descartan duplicados:</p>
+<p class='error'><span class='time-tag'>|0,05| </span><span class='test-log-prefix'>&lt;TestCaseExample1:ErrorReportExample&gt; </span> [ERROR] TEST ERROR DETECTED > EXAMPLE_OF_EXTENDED_ERROR;DefaultTest;TestCaseExample1;ErrorReportExample > Today Date: 2023-10-15 23:49:04;1 + 1: 2;Value Of PI: 3,141592653589793;Roses are: Blue</p>
+<p class='warning'><span class='time-tag'>|0,05| </span><span class='test-log-prefix'>&lt;TestCaseExample1:ErrorReportExample&gt; </span> [WARNING] El error con ErrorType 'EXAMPLE_OF_EXTENDED_ERROR' introducido esta duplicado, no se ha insertado</p>
+<p class='ok'><span class='time-tag'>|0,05| </span><span class='test-log-prefix'>&lt;TestCaseExample1:WaitExample&gt; </span> [OK] Este es el tercer Step del caso de prueba</p>
+<p class='ok'><span class='time-tag'>|0,05| </span><span class='test-log-prefix'>&lt;TestCaseExample1:WaitExample&gt; </span> [OK] Se va a hacer una espera de 2s</p>
+<p class='ok'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample1:End&gt; </span> [OK] Ha terminado el caso de prueba: 'TestCaseExample1'</p>
+<p class='ok'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:Init&gt; </span> [OK] Comenzando el caso de prueba: 'TestCaseExample2'</p>
+<p class='ok'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:Introduction&gt; </span> [OK] Este es el primer Step del caso de prueba</p>
+<p class='ok'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:Introduction&gt; </span> [OK] Deberías probar a implementar tu propio test creandole un grafo de flujo que cumpla tus necesidades</p>
+<p class='ok'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:ErrorReportExample&gt; </span> [OK] Este es el segundo Step del caso de prueba</p>
+<p class='ok'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:ErrorReportExample&gt; </span> [OK] Se va a reportar un error simple sin campos adicionales como ejemplo:</p>
+<p class='error'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:ErrorReportExample&gt; </span> [ERROR] TEST ERROR DETECTED > EXAMPLE_OF_SIMPLE_ERROR;DefaultTest;TestCaseExample2;ErrorReportExample</p>
+<p class='ok'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:ErrorReportExample&gt; </span> [OK] Se va a reportar un error extendido con campos adicionales como ejemplo:</p>
+<p class='error'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:ErrorReportExample&gt; </span> [ERROR] TEST ERROR DETECTED > EXAMPLE_OF_EXTENDED_ERROR;DefaultTest;TestCaseExample2;ErrorReportExample > Today Date: 2023-10-15 23:49:06;1 + 1: 2;Value Of PI: 3,141592653589793;Roses are: Blue</p>
+<p class='ok'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:ErrorReportExample&gt; </span> [OK] Dos errores en un mismo TestCase y con todos sus campos iguales (ignorando el Step) se consideran iguales, y se descartan duplicados:</p>
+<p class='error'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:ErrorReportExample&gt; </span> [ERROR] TEST ERROR DETECTED > EXAMPLE_OF_EXTENDED_ERROR;DefaultTest;TestCaseExample2;ErrorReportExample > Today Date: 2023-10-15 23:49:06;1 + 1: 2;Value Of PI: 3,141592653589793;Roses are: Blue</p>
+<p class='warning'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:ErrorReportExample&gt; </span> [WARNING] El error con ErrorType 'EXAMPLE_OF_EXTENDED_ERROR' introducido esta duplicado, no se ha insertado</p>
+<p class='ok'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:WaitExample&gt; </span> [OK] Este es el tercer Step del caso de prueba</p>
+<p class='ok'><span class='time-tag'>|2,06| </span><span class='test-log-prefix'>&lt;TestCaseExample2:WaitExample&gt; </span> [OK] Se va a hacer una espera de 2s</p>
+<p class='ok'><span class='time-tag'>|4,07| </span><span class='test-log-prefix'>&lt;TestCaseExample2:End&gt; </span> [OK] Ha terminado el caso de prueba: 'TestCaseExample2'</p>
+<p class='ok'><span class='time-tag'>|4,07| </span><span class='test-log-prefix'></span> [OK] > Se han comprobado todos los casos de prueba del test: 'DefaultTest'</p>
+<p class='ok'><span class='time-tag'>|5,08| </span>[OK] El test 'DefaultTest' ha terminado correctamente dentro de su plazo maximo, la ejecucion ha terminado</p>
+<p class='ok'><span class='time-tag'>|5,08| </span>Cerrando el log...</p>
+</body>
+</html>

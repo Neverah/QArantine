@@ -133,8 +133,8 @@ namespace TestFramework.Code
             protected void LoadRequiredData()
             {
                 LogManager.LogTestOK($"> Cargando los datos para el test: '{this.Name}'");
-
             }
+
             protected void CreateTestCasesList()
             {
                 LogManager.LogTestOK($"> Creando la lista de casos de prueba del test: '{this.Name}'");
@@ -145,7 +145,9 @@ namespace TestFramework.Code
 
             protected void RecoverStatusFromPreviousExecution()
             {
-                LogManager.LogTestOK($"> Recuperando el estado de una posible ejecución anterior: '{this.Name}'");
+                LogManager.LogTestOK($"> Recuperando el estado tras una posible ejecución anterior: '{this.Name}'");
+                DeleteOldTestExecutionOutputFiles();
+                CreateTestOutputDirectories();
             }
 
             protected void SetTestPreconditions()
@@ -164,6 +166,35 @@ namespace TestFramework.Code
                 else Status = TestStatus.Passed;
 
                 LogManager.LogTestOK($"> Se han comprobado todos los casos de prueba del test: '{this.Name}'");
+
+                // El log se copiará a la carpeta de Output del test al cerrar el programa, si hay log
+                if (LogManager.ThisExecutionHasLogFileDump()) AppDomain.CurrentDomain.ProcessExit += (sender, args) => CopyLogToTestOutputFile();
+            }
+
+            private void DeleteOldTestExecutionOutputFiles()
+            {
+                string outputDirPath = TestManager.GetOutputRootPath() + "/" + Name;
+                if (Directory.Exists(outputDirPath))
+                {
+                    LogManager.LogTestOK($"> Eliminando el directorio de /Ouput de una ejecucion anterior del test: '{this.Name}'");
+                    Directory.Delete(outputDirPath, true);
+                }
+            }
+
+            private void CreateTestOutputDirectories()
+            {
+                LogManager.LogTestOK($"> Creando los directorios necesarios para el test: '{this.Name}'");
+
+                string outputRootPath = TestManager.GetOutputRootPath();
+
+                Directory.CreateDirectory(outputRootPath);
+                Directory.CreateDirectory(outputRootPath + "/" + Name);
+            }
+
+            private void CopyLogToTestOutputFile()
+            {
+                Thread.Sleep(500);
+                File.Copy(LogManager.GetLogPath(), TestManager.GetOutputRootPath() + "/" + Name + "/" + "Log.html");
             }
 
             private void ExecutionLoop()

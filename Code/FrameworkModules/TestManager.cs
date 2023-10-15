@@ -5,14 +5,19 @@ namespace TestFramework.Code.FrameworkModules
 {
     public class TestManager
     {
-        public const string OUTPUT_DIRECTORY = "TestOutput";
         public FrameworkTest? CurrentTest { get; set; }
-
+        
+        private static string OutputRootPath;
         private CancellationTokenSource? TestCancellationTokenSource;
         private Thread? CurrentTestThread;
 
         private static TestManager? _instance;
-        private TestManager() => LogManager.TestManager = this;
+        private TestManager()
+        {
+            LogManager.TestManager = this;
+            OutputRootPath = "";
+        }
+
         public static TestManager Instance
         {
             get
@@ -24,8 +29,8 @@ namespace TestFramework.Code.FrameworkModules
 
         public async Task LaunchTest(string testClassName)
         {
-            CreateTestDirectories();
-            LogManager.StartLogFile(testClassName);
+            ConfigManager.LoadTestFrameworkMainConfig();
+            LogManager.StartLogFile();
 
             Type? testClass = GetTestClass(testClassName);
             if (testClass == null) Environment.Exit(-1);
@@ -40,9 +45,23 @@ namespace TestFramework.Code.FrameworkModules
             await CreateTestTimeoutAwaitThreadAsync();
         }
 
-        private static void CreateTestDirectories()
+        public static string GetOutputRootPath()
         {
-            Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, OUTPUT_DIRECTORY));
+            InitOutputRootPath();
+            return OutputRootPath;
+        }
+
+        private static void InitOutputRootPath()
+        {
+            if (OutputRootPath != null && OutputRootPath != "") return;
+
+            if ((OutputRootPath = ConfigManager.GetConfigParam("TestFrameworkOutputRootPath")!) == null)
+            {
+                LogManager.LogError("Could not find the 'TestFrameworkOutputRootPath' config param, the test can not continue, aborting");
+                Environment.Exit(-1);
+            }
+            
+            if (!Path.IsPathRooted(OutputRootPath)) OutputRootPath = Path.Combine(Environment.CurrentDirectory, OutputRootPath);
         }
 
         private static Type? GetTestClass(string testClassName)

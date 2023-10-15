@@ -5,7 +5,7 @@ namespace TestFramework.Code.FrameworkModules
 {
     public static class LogManager
     {
-        private static string LogPath = TestManager.OUTPUT_DIRECTORY + "/Log";
+        private static string LogPath;
         private static bool LogOpen = false;
         private static bool DumpToLogFile = false;
         private static StreamWriter? LogFile;
@@ -22,7 +22,11 @@ namespace TestFramework.Code.FrameworkModules
         public static LogLevel LogLvl { get; set; }
         public static TestManager? TestManager { get; set; }
 
-        static LogManager() => LogLvl = LogLevel.Warning;
+        static LogManager()
+        {
+            LogLvl = LogLevel.Warning;
+            LogPath = "";
+        }
 
         public static void LogError(string message)
         {
@@ -112,6 +116,73 @@ namespace TestFramework.Code.FrameworkModules
             }
         }
 
+        public static void StartLogFile()
+        {
+            if(!LogOpen && ThisExecutionHasLogFileDump())
+            {
+                InitLogLevel();
+                InitLogPath();
+                DeleteOldLogFile();
+                CreateTestLogFile();
+                LogOpen = true;
+                DumpToLogFile = true;
+            }
+        }
+
+        public static void CloseLogFile()
+        {
+            if (LogOpen)
+            {
+                LogFile?.WriteLine("<p class='ok'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>Cerrando el log...</p>");
+                LogFile?.WriteLine("</body>");
+                LogFile?.WriteLine("</html>");
+                DumpToLogFile = false;
+                LogFile?.Close();
+                LogOpen = false;
+            }
+        }
+
+        public static string GetLogPath()
+        {
+            InitLogPath();
+            return LogPath;
+        }
+
+        public static bool IsLogFileDumpActive()
+        {
+            return DumpToLogFile;
+        }
+
+        public static bool ThisExecutionHasLogFileDump()
+        {
+            return ConfigManager.GetConfigParam("DumpLogsToFile") == "true";
+        }
+
+        private static void InitLogLevel()
+        {
+            string logLvlName;
+            if ((logLvlName = ConfigManager.GetConfigParam("LogLevel")!) == null)
+            {
+                LogError("Could not find the 'LogLevel' config param, the log can not be opened, aborting execution");
+                Environment.Exit(-1);
+            }
+
+            LogLvl = (LogLevel)Enum.Parse(typeof(LogLevel), logLvlName);
+        }
+
+        private static void InitLogPath()
+        {
+            if (LogPath != null && LogPath != "") return;
+
+            if ((LogPath = ConfigManager.GetConfigParam("LogPath")!) == null)
+            {
+                LogError("Could not find the 'LogPath' config param, the log can not be opened, aborting execution");
+                Environment.Exit(-1);
+            }
+            
+            if (!Path.IsPathRooted(LogPath)) LogPath = Path.Combine(Environment.CurrentDirectory, LogPath);
+        }
+
         private static void PrintCallStack()
         {
             StackTrace stackTrace = new();
@@ -154,32 +225,7 @@ namespace TestFramework.Code.FrameworkModules
             return "|" + TimeManager.AppClock.Elapsed.TotalSeconds.ToString("0.00") + "| ";
         }
 
-        public static void StartLogFile(string testClassName)
-        {
-            if(!LogOpen)
-            {
-                if (testClassName != null) LogPath = LogPath + "_" + testClassName + ".html";
-                else LogPath += ".html";
-
-                DeleteOldTestLogFile();
-                CreateTestLogFile();
-                LogOpen = true;
-                DumpToLogFile = true;
-            }
-        }
-
-        public static void CloseLogFile()
-        {
-            if (LogOpen)
-            {
-                LogFile?.WriteLine("<p class='ok'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>Cerrando el log...</p>");
-                LogFile?.WriteLine("</body>");
-                LogFile?.WriteLine("</html>");
-                LogFile?.Close();
-            }
-        }
-
-        private static void DeleteOldTestLogFile()
+        private static void DeleteOldLogFile()
         {
             if (File.Exists(LogPath)) File.Delete(LogPath);
         }
