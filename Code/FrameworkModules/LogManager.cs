@@ -26,6 +26,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogLvl >= LogLevel.Error)
             {
+                PrintConsoleLogTimePrefix();
                 Console.ForegroundColor = ConsoleColor.Red;
                 WriteLog($"[ERROR] {message}", LogLevel.Error);
             }
@@ -37,6 +38,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogLvl >= LogLevel.OK)
             {
+                PrintConsoleLogTimePrefix();
                 Console.ForegroundColor = ConsoleColor.Green;
                 WriteLog($"[OK] {message}", LogLevel.OK);
             }
@@ -46,6 +48,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogLvl >= LogLevel.Warning)
             {
+                PrintConsoleLogTimePrefix();
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 WriteLog($"[WARNING] {message}", LogLevel.Warning);
             }
@@ -55,6 +58,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogLvl >= LogLevel.Debug)
             {
+                PrintConsoleLogTimePrefix();
                 Console.ForegroundColor = ConsoleColor.White;
                 WriteLog($"[DEBUG] {message}", LogLevel.Debug);
             }
@@ -64,6 +68,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogLvl >= LogLevel.Error)
             {
+                PrintConsoleLogTimePrefix();
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.Red;
                 WriteLog($"[ERROR] {message}", LogLevel.Error, true);
@@ -76,6 +81,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogLvl >= LogLevel.OK)
             {
+                PrintConsoleLogTimePrefix();
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.Green;
                 WriteLog($"[OK] {message}", LogLevel.OK, true);
@@ -86,6 +92,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogLvl >= LogLevel.Warning)
             {
+                PrintConsoleLogTimePrefix();
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 WriteLog($"[WARNING] {message}", LogLevel.Warning, true);
@@ -96,6 +103,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogLvl >= LogLevel.Debug)
             {
+                PrintConsoleLogTimePrefix();
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.White;
                 WriteLog($"[DEBUG] {message}", LogLevel.Debug, true);
@@ -117,10 +125,14 @@ namespace TestFramework.Code.FrameworkModules
             WriteLog("}", LogLevel.Debug);
         }
 
-        private static void PrintConsoleLogTestPrefix()
+        private static void PrintConsoleLogTimePrefix()
         {
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(GetFormatedElapsedTime());
+        }
+
+        private static void PrintConsoleLogTestPrefix()
+        {
             Console.ForegroundColor = ConsoleColor.DarkBlue;
             Console.Write(GetLogTestPrefix());
         }

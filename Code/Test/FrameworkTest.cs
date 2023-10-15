@@ -13,14 +13,15 @@ namespace TestFramework.Code
                 Failed
             }
 
+            public float Timeout = 60f;
             public bool Paused { get; set; }
-            public float Timeout { get; set; }
             public TestStatus Status { get; set; }
             public string Name { get; }
             public TestCase? CurrentTestCase { get; set; }
-            public string TestCaseInitStepID { get; }
-            public string TestCaseEndStepID { get; }
+            public string TestCaseInitStepID { get; set; }
+            public string TestCaseEndStepID { get; set; }
 
+            private CancellationToken TimeoutToken;
             private readonly TestFlowGraph FlowGraph;
             private readonly List<TestCase> TestCasesList;
 
@@ -28,20 +29,20 @@ namespace TestFramework.Code
             {
                 Name = GetType().Name;
 
-                Paused = false;
-                Timeout = 30f;
-
-                Status = TestStatus.Testing;
-
                 TestCaseInitStepID = "Init";
                 TestCaseEndStepID = "End";
+
+                Paused = false;
+                Status = TestStatus.Testing;
 
                 FlowGraph = CreateFlowGraph();
                 TestCasesList = new();
             }
 
-            public void Launch()
+            public void Launch(CancellationToken timeoutToken)
             {
+                TimeoutToken = timeoutToken;
+
                 LoadRequiredData();
                 CreateTestCasesList();
                 RecoverStatusFromPreviousExecution();
