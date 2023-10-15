@@ -7,7 +7,7 @@ class Program
         if (args.Length <= 0)
         {
             LogManager.LogError("Por favor, proporciona el nombre de la clase del test que quieres ejecutar como parámetro de entrada.");
-            return;
+            Environment.Exit(-1);
         }
         
         await TestManager.Instance.LaunchTest(args[0]);

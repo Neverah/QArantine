@@ -25,16 +25,16 @@ namespace TestFramework.Code.FrameworkModules
         public async Task LaunchTest(string testClassName)
         {
             CreateTestDirectories();
-            LogManager.StartTestLogFile(testClassName);
+            LogManager.StartLogFile(testClassName);
 
             Type? testClass = GetTestClass(testClassName);
-            if (testClass == null) return;
+            if (testClass == null) Environment.Exit(-1);
 
             CurrentTest = GetTestInstance(testClass);
-            if (CurrentTest == null) return;
+            if (CurrentTest == null) Environment.Exit(-1);
 
             MethodInfo? testLaunchMethod = GetTestLaunchMethod(testClass);
-            if (testLaunchMethod == null) return;
+            if (testLaunchMethod == null) Environment.Exit(-1);
             
             CreateTestThread(testLaunchMethod);
             await CreateTestTimeoutAwaitThreadAsync();

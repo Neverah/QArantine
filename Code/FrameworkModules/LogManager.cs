@@ -6,6 +6,7 @@ namespace TestFramework.Code.FrameworkModules
     public static class LogManager
     {
         private static string LogPath = TestManager.OUTPUT_DIRECTORY + "/Log";
+        private static bool LogOpen = false;
         private static bool DumpToLogFile = false;
         private static StreamWriter? LogFile;
 
@@ -17,6 +18,7 @@ namespace TestFramework.Code.FrameworkModules
             Warning,
             Debug
         }
+
         public static LogLevel LogLvl { get; set; }
         public static TestManager? TestManager { get; set; }
 
@@ -152,19 +154,23 @@ namespace TestFramework.Code.FrameworkModules
             return "|" + TimeManager.AppClock.Elapsed.TotalSeconds.ToString("0.00") + "| ";
         }
 
-        public static void StartTestLogFile(string testClassName)
+        public static void StartLogFile(string testClassName)
         {
-            if (testClassName != null) LogPath = LogPath + "_" + testClassName + ".html";
-            else LogPath += ".html";
+            if(!LogOpen)
+            {
+                if (testClassName != null) LogPath = LogPath + "_" + testClassName + ".html";
+                else LogPath += ".html";
 
-            DeleteOldTestLogFile();
-            CreateTestLogFile();
-            DumpToLogFile = true;
+                DeleteOldTestLogFile();
+                CreateTestLogFile();
+                LogOpen = true;
+                DumpToLogFile = true;
+            }
         }
 
-        public static void CloseTestLogFile()
+        public static void CloseLogFile()
         {
-            if (DumpToLogFile)
+            if (LogOpen)
             {
                 LogFile?.WriteLine("<p class='ok'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>Cerrando el log...</p>");
                 LogFile?.WriteLine("</body>");
@@ -209,7 +215,7 @@ namespace TestFramework.Code.FrameworkModules
             LogFile.WriteLine(htmlHeader);
 
             // Manejador de eventos para cerrar el log en el cierre de la aplicación
-            AppDomain.CurrentDomain.ProcessExit += (sender, args) => CloseTestLogFile();
+            AppDomain.CurrentDomain.ProcessExit += (sender, args) => CloseLogFile();
         }
 
         private static void WriteLog(string message, LogLevel lvl, bool printPrefixOnFile = false)
