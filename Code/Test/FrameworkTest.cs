@@ -50,7 +50,18 @@ namespace TestFramework.Code
                 ExecutionLoop();
             }
 
-            public bool HasErrors()
+            public TestError CreateTestError(string errorID)
+            {
+                return new(Name, CurrentTestCase != null ? CurrentTestCase.ID : "UNKNOWN_TEST_CASE", CurrentTestCase != null ? CurrentTestCase.CurrentStep : "UNKNOWN_TEST_STEP", errorID);
+            }
+
+            public void ReportTestError(TestError newError)
+            {
+                LogManager.LogTestError($"TEST ERROR DETECTED > {newError}");
+                CurrentTestCase?.AddError(newError);
+            }
+
+            protected bool HasErrors()
             {
                 foreach(TestCase testCase in TestCasesList)
                 {
@@ -65,28 +76,53 @@ namespace TestFramework.Code
                 {
                     { "Init", () => 
                         {
-                            LogManager.LogOK($"Comenzando el caso de prueba: '{CurrentTestCase}'");
-                            return ("Step1", 1f);
+                            LogManager.LogTestOK($"Comenzando el caso de prueba: '{CurrentTestCase}'");
+                            return ("Introduction", 0f);
                         } 
                     },
 
-                    { "Step1", () => 
+                    { "Introduction", () => 
                         {
-                            LogManager.LogOK($"Esto es el Step1");
-                            return ("Step2", 1f);
+                            LogManager.LogTestOK($"Este es el primer Step del caso de prueba");
+                            LogManager.LogTestOK($"Deberías probar a implementar tu propio test creandole un grafo de flujo que cumpla tus necesidades");
+                            return ("ErrorReportExample", 0f);
                         } 
                     },
 
-                    { "Step2", () => 
+                    { "ErrorReportExample", () => 
                         {
-                            LogManager.LogOK($"Esto es el Step2");
+                            LogManager.LogTestOK($"Este es el segundo Step del caso de prueba");
+                            LogManager.LogTestOK($"Se va a reportar un error simple sin campos adicionales como ejemplo:");
+                            ReportTestError(CreateTestError("EXAMPLE_OF_SIMPLE_ERROR"));
+                            LogManager.LogTestOK($"Se va a reportar un error extendido con campos adicionales como ejemplo:");
+                            ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR")
+                                .AddExtraField(("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
+                                .AddExtraField(("1 + 1", 1 + 1))
+                                .AddExtraField(("Value Of PI", Math.PI))
+                                .AddExtraField(("Roses are", "Blue"))
+                            );
+                            LogManager.LogTestOK($"Dos errores en un mismo TestCase y con todos sus campos iguales (ignorando el Step) se consideran iguales, y se descartan duplicados:");
+                            ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR")
+                                .AddExtraField(("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
+                                .AddExtraField(("1 + 1", 1 + 1))
+                                .AddExtraField(("Value Of PI", Math.PI))
+                                .AddExtraField(("Roses are", "Blue"))
+                            );
+                            return ("WaitExample", 0f);
+                        } 
+                    },
+
+                    { "WaitExample", () => 
+                        {
+                            LogManager.LogTestOK($"Este es el tercer Step del caso de prueba");
+                            LogManager.LogTestOK($"Se va a hacer una espera de 2s");
                             return ("End", 2f);
                         } 
                     },
 
                     { "End", () => 
                         {
-                            LogManager.LogOK($"Ha terminado el caso de prueba: '{CurrentTestCase}'");
+                            LogManager.LogTestOK($"Ha terminado el caso de prueba: '{CurrentTestCase}'");
                             return ("", 0f);
                         } 
                     },
@@ -95,29 +131,30 @@ namespace TestFramework.Code
 
             protected void LoadRequiredData()
             {
-                LogManager.LogOK($"> Cargando los datos para el test: '{this.Name}'");
+                LogManager.LogTestOK($"> Cargando los datos para el test: '{this.Name}'");
 
             }
             protected void CreateTestCasesList()
             {
-                LogManager.LogOK($"> Creando la lista de casos de prueba del test: '{this.Name}'");
+                LogManager.LogTestOK($"> Creando la lista de casos de prueba del test: '{this.Name}'");
 
-                TestCasesList.Add(new(this, "TestCaseDePrueba"));
+                TestCasesList.Add(new(this, "TestCaseExample1"));
+                TestCasesList.Add(new(this, "TestCaseExample2"));
             }
 
             protected void RecoverStatusFromPreviousExecution()
             {
-                LogManager.LogOK($"> Recuperando el estado de una posible ejecución anterior: '{this.Name}'");
+                LogManager.LogTestOK($"> Recuperando el estado de una posible ejecución anterior: '{this.Name}'");
             }
 
             protected void SetTestPreconditions()
             {
-                LogManager.LogOK($"> Estableciendo las precondiciones del test: '{this.Name}'");
+                LogManager.LogTestOK($"> Estableciendo las precondiciones del test: '{this.Name}'");
             }
 
             protected void OnTestStart()
             {
-                LogManager.LogOK($"> Iniciando el test: '{this.Name}'");
+                LogManager.LogTestOK($"> Iniciando el test: '{this.Name}'");
             }
 
             protected void OnTestEnd()
@@ -125,12 +162,12 @@ namespace TestFramework.Code
                 if (HasErrors()) Status = TestStatus.Failed;
                 else Status = TestStatus.Passed;
 
-                LogManager.LogOK($"> Se han comprobado todos los casos de prueba del test: '{this.Name}'");
+                LogManager.LogTestOK($"> Se han comprobado todos los casos de prueba del test: '{this.Name}'");
             }
 
             private void ExecutionLoop()
             {
-                LogManager.LogOK($"> Van a comenzar a probarse todos los casos de prueba del test: '{this.Name}'");
+                LogManager.LogTestOK($"> Van a comenzar a probarse todos los casos de prueba del test: '{this.Name}'");
 
                 CurrentTestCase = GetNextTestCase();
                 while (CurrentTestCase != null)

@@ -19,7 +19,7 @@ namespace TestFramework.Code
             public string ID { get; }
             public string CurrentStep{ get => _CurrentStep; }
             public TestCaseStatus Status { get => _Status; }
-            public List<TestError> TestCaseErrors { get; }
+            private readonly HashSet<TestError> TestCaseErrors;
 
             public TestCase(FrameworkTest parentTest, string ID)
             {
@@ -43,6 +43,24 @@ namespace TestFramework.Code
                 }
             }
 
+            public bool HasErrors()
+            {
+                return TestCaseErrors.Count > 0;
+            }
+
+            public void AddError(TestError testError)
+            {
+                if (!TestCaseErrors.Add(testError))
+                {
+                    LogManager.LogTestWarning($"El error con ErrorType '{testError.ErrorID}' introducido esta duplicado, no se ha insertado");
+                }
+            }
+
+            public override string ToString()
+            {
+                return ID;
+            }
+
             protected void OnTestCaseStart()
             {
                 LogManager.LogOK($"> Ha comenzado el TestCase: '{this.ID}'");
@@ -53,9 +71,9 @@ namespace TestFramework.Code
                 LogManager.LogOK($"> Ha finalizado el TestCase: '{this.ID}'");
             }
 
-            public bool HasErrors()
+            private void ErrorAlreadyExists(TestError newError)
             {
-                return TestCaseErrors.Count > 0;
+
             }
         }
     }

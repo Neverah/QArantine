@@ -20,15 +20,14 @@ namespace TestFramework.Code.FrameworkModules
         public static LogLevel LogLvl { get; set; }
         public static TestManager? TestManager { get; set; }
 
-        static LogManager() => LogLvl = LogLevel.Debug;
+        static LogManager() => LogLvl = LogLevel.Warning;
 
         public static void LogError(string message)
         {
             if (LogLvl >= LogLevel.Error)
             {
-                PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.Red;
-                WriteTestLog($"[ERROR] {message}", LogLevel.Error);
+                WriteLog($"[ERROR] {message}", LogLevel.Error);
             }
 
             if (LogLvl >= LogLevel.Debug) PrintCallStack();
@@ -38,9 +37,8 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogLvl >= LogLevel.OK)
             {
-                PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.Green;
-                WriteTestLog($"[OK] {message}", LogLevel.OK);
+                WriteLog($"[OK] {message}", LogLevel.OK);
             }
         }
 
@@ -48,9 +46,8 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogLvl >= LogLevel.Warning)
             {
-                PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
-                WriteTestLog($"[WARNING] {message}", LogLevel.Warning);
+                WriteLog($"[WARNING] {message}", LogLevel.Warning);
             }
         }
 
@@ -58,9 +55,50 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogLvl >= LogLevel.Debug)
             {
+                Console.ForegroundColor = ConsoleColor.White;
+                WriteLog($"[DEBUG] {message}", LogLevel.Debug);
+            }
+        }
+
+        public static void LogTestError(string message)
+        {
+            if (LogLvl >= LogLevel.Error)
+            {
+                PrintConsoleLogTestPrefix();
+                Console.ForegroundColor = ConsoleColor.Red;
+                WriteLog($"[ERROR] {message}", LogLevel.Error, true);
+            }
+
+            if (LogLvl >= LogLevel.Debug) PrintCallStack();
+        }
+
+        public static void LogTestOK(string message)
+        {
+            if (LogLvl >= LogLevel.OK)
+            {
+                PrintConsoleLogTestPrefix();
+                Console.ForegroundColor = ConsoleColor.Green;
+                WriteLog($"[OK] {message}", LogLevel.OK, true);
+            }
+        }
+
+        public static void LogTestWarning(string message)
+        {
+            if (LogLvl >= LogLevel.Warning)
+            {
+                PrintConsoleLogTestPrefix();
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                WriteLog($"[WARNING] {message}", LogLevel.Warning, true);
+            }
+        }
+
+        public static void LogTestDebug(string message)
+        {
+            if (LogLvl >= LogLevel.Debug)
+            {
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.White;
-                WriteTestLog($"[DEBUG] {message}", LogLevel.Debug);
+                WriteLog($"[DEBUG] {message}", LogLevel.Debug, true);
             }
         }
 
@@ -69,14 +107,14 @@ namespace TestFramework.Code.FrameworkModules
             StackTrace stackTrace = new();
 
             Console.ForegroundColor = ConsoleColor.White;
-            WriteTestLog("Call Stack:\n{", LogLevel.Debug, false);
+            WriteLog("Call Stack:\n{", LogLevel.Debug);
             for (int i = 0; i < stackTrace.FrameCount; i++)
             {
                 StackFrame? frame = stackTrace.GetFrame(i);
                 MethodBase? method = frame.GetMethod();
-                WriteTestLog($"\t- {method?.DeclaringType}.{method?.Name}", LogLevel.Debug, false);
+                WriteLog($"\t- {method?.DeclaringType}.{method?.Name}", LogLevel.Debug);
             }
-            WriteTestLog("}", LogLevel.Debug, false);
+            WriteLog("}", LogLevel.Debug);
         }
 
         private static void PrintConsoleLogTestPrefix()
@@ -114,10 +152,13 @@ namespace TestFramework.Code.FrameworkModules
 
         public static void CloseTestLogFile()
         {
-            LogFile?.WriteLine("<p class='ok'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>Cerrando el log...</p>");
-            LogFile?.WriteLine("</body>");
-            LogFile?.WriteLine("</html>");
-            LogFile?.Close();
+            if (DumpToLogFile)
+            {
+                LogFile?.WriteLine("<p class='ok'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>Cerrando el log...</p>");
+                LogFile?.WriteLine("</body>");
+                LogFile?.WriteLine("</html>");
+                LogFile?.Close();
+            }
         }
 
         private static void DeleteOldTestLogFile()
@@ -137,7 +178,7 @@ namespace TestFramework.Code.FrameworkModules
                     /* Estilo para los párrafos */
                     p {
                         margin: 5px 0;
-                        font-size: 14px;
+                        font-size: 13px;
                         font-weight: bold;
                         font-family: 'Arial', sans-serif;
                     }
@@ -145,10 +186,10 @@ namespace TestFramework.Code.FrameworkModules
                     body { background-color: #111; color: white; }
                     /* Estilos para los diferentes tags de logs */
                     .error { color: rgb(220, 69, 69); }
-                    .ok { color: rgb(20, 140, 20); }
+                    .ok { color: rgb(60, 185, 60); }
                     .warning { color: rgb(220, 180, 80) }
                     .debug { color: rgb(230, 230, 230); }
-                    .test-log-prefix { color: rgb(100, 100, 240); }
+                    .test-log-prefix { color: rgb(160, 100, 220); }
                     .time-tag { color: rgb(160, 160, 160); }
                 </style>
             </head>
@@ -159,13 +200,13 @@ namespace TestFramework.Code.FrameworkModules
             AppDomain.CurrentDomain.ProcessExit += (sender, args) => CloseTestLogFile();
         }
 
-        private static void WriteTestLog(string message, LogLevel lvl, bool printPrefixOnFile = true)
+        private static void WriteLog(string message, LogLevel lvl, bool printPrefixOnFile = false)
         {
             Console.WriteLine(message);
-            if (DumpToLogFile) WriteTestLogOnFile(message, lvl, printPrefixOnFile);
+            if (DumpToLogFile) WriteLogOnFile(message, lvl, printPrefixOnFile);
         }
 
-        private static void WriteTestLogOnFile(string message, LogLevel lvl, bool printPrefix)
+        private static void WriteLogOnFile(string message, LogLevel lvl, bool printPrefix)
         {
             string logClassName;
             switch (lvl)
