@@ -1,2 +1,7 @@
+# Compilation
+/bin/
+/obj/
+
+# Framework output
 /TestsOutput/*
 /Log.html
