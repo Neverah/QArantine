@@ -28,7 +28,7 @@ namespace TestFramework.Code.FrameworkModules
             }
             else
             {
-                LogManager.LogError($"No se ha podido encontrar el parametro de configuracion con ID: '{paramID}'");
+                LogManager.LogError($"The configuration parameter with ID '{paramID}' could not be found");
                 return null;
             }
         }
@@ -69,7 +69,7 @@ namespace TestFramework.Code.FrameworkModules
             }
             catch (Exception ex)
             {
-                LogManager.LogError($"Error al leer el archivo: {ex.Message}");
+                LogManager.LogError($"Error reading the file '{MAIN_CONFIG_FILE_PATH}': {ex.Message}");
             }
         }
     }

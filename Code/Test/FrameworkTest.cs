@@ -3,10 +3,10 @@ namespace TestFramework.Code
     namespace Test
     {
         using TestFramework.Code.FrameworkModules;
-        using TestFlowGraph = Dictionary<string, Func<(String, float)>>;
+        using TestFlowChart = Dictionary<string, Func<(String, float)>>;
         public abstract class FrameworkTest
         {
-            public enum TestStatus
+            public enum TestState
             {
                 Testing,
                 Passed,
@@ -15,14 +15,14 @@ namespace TestFramework.Code
 
             public float Timeout = 60f;
             public bool Paused { get; set; }
-            public TestStatus Status { get; set; }
+            public TestState State { get; set; }
             public string Name { get; }
             public TestCase? CurrentTestCase { get; set; }
             public string TestCaseInitStepID { get; set; }
             public string TestCaseEndStepID { get; set; }
 
             private CancellationToken TimeoutToken;
-            private readonly TestFlowGraph FlowGraph;
+            private readonly TestFlowChart FlowChart;
             private readonly List<TestCase> TestCasesList;
 
             public FrameworkTest()
@@ -33,9 +33,9 @@ namespace TestFramework.Code
                 TestCaseEndStepID = "End";
 
                 Paused = false;
-                Status = TestStatus.Testing;
+                State = TestState.Testing;
 
-                FlowGraph = CreateFlowGraph();
+                FlowChart = CreateFlowChart();
                 TestCasesList = new();
             }
 
@@ -45,7 +45,7 @@ namespace TestFramework.Code
 
                 LoadRequiredData();
                 CreateTestCasesList();
-                RecoverStatusFromPreviousExecution();
+                RecoverStateFromPreviousExecution();
                 SetTestPreconditions();
                 OnTestStart();
                 ExecutionLoop();
@@ -71,38 +71,38 @@ namespace TestFramework.Code
                 return false;
             }
 
-            protected virtual TestFlowGraph CreateFlowGraph()
+            protected virtual TestFlowChart CreateFlowChart()
             {
-                return new TestFlowGraph
+                return new TestFlowChart
                 {
                     { "Init", () => 
                         {
-                            LogManager.LogTestOK($"Comenzando el caso de prueba: '{CurrentTestCase}'");
+                            LogManager.LogTestOK($"Starting the current TestCase: '{CurrentTestCase}'");
                             return ("Introduction", 0f);
                         } 
                     },
 
                     { "Introduction", () => 
                         {
-                            LogManager.LogTestOK($"Este es el primer Step del caso de prueba");
-                            LogManager.LogTestOK($"Deberías probar a implementar tu propio test creandole un grafo de flujo que cumpla tus necesidades");
+                            LogManager.LogTestOK($"This is the first TestStep of the current TestCase");
+                            LogManager.LogTestOK($"You should try implementing your own test by creating a flowchart that meets your needs");
                             return ("ErrorReportExample", 0f);
                         } 
                     },
 
                     { "ErrorReportExample", () => 
                         {
-                            LogManager.LogTestOK($"Este es el segundo Step del caso de prueba");
-                            LogManager.LogTestOK($"Se va a reportar un error simple sin campos adicionales como ejemplo:");
+                            LogManager.LogTestOK($"This is the second step of the current TestCase");
+                            LogManager.LogTestOK($"An example of a simple error report (without additional fields):");
                             ReportTestError(CreateTestError("EXAMPLE_OF_SIMPLE_ERROR"));
-                            LogManager.LogTestOK($"Se va a reportar un error extendido con campos adicionales como ejemplo:");
+                            LogManager.LogTestOK($"An example of an extended error report (with additional fields):");
                             ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR")
                                 .AddExtraField(("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
                                 .AddExtraField(("1 + 1", 1 + 1))
                                 .AddExtraField(("Value Of PI", Math.PI))
                                 .AddExtraField(("Roses are", "Blue"))
                             );
-                            LogManager.LogTestOK($"Dos errores en un mismo TestCase y con todos sus campos iguales (ignorando el Step) se consideran iguales, y se descartan duplicados:");
+                            LogManager.LogTestOK($"Two errors in the same TestCase with all their fields being the same (excluding the TestStep) are considered equal, and duplicates are discarded");
                             ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR")
                                 .AddExtraField(("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
                                 .AddExtraField(("1 + 1", 1 + 1))
@@ -115,15 +115,15 @@ namespace TestFramework.Code
 
                     { "WaitExample", () => 
                         {
-                            LogManager.LogTestOK($"Este es el tercer Step del caso de prueba");
-                            LogManager.LogTestOK($"Se va a hacer una espera de 2s");
+                            LogManager.LogTestOK($"This is the third step of the current TestCase");
+                            LogManager.LogTestOK($"A 2-second delay will be executed");
                             return ("End", 2f);
                         } 
                     },
 
                     { "End", () => 
                         {
-                            LogManager.LogTestOK($"Ha terminado el caso de prueba: '{CurrentTestCase}'");
+                            LogManager.LogTestOK($"The TestCase has been completed: '{CurrentTestCase}'");
                             return ("", 0f);
                         } 
                     },
@@ -132,40 +132,40 @@ namespace TestFramework.Code
 
             protected virtual void LoadRequiredData()
             {
-                LogManager.LogTestOK($"> Cargando los datos para el test: '{this.Name}'");
+                LogManager.LogTestOK($"> Loading the data for the test: '{this.Name}'");
             }
 
             protected virtual void CreateTestCasesList()
             {
-                LogManager.LogTestOK($"> Creando la lista de casos de prueba del test: '{this.Name}'");
+                LogManager.LogTestOK($"> Creating the list of TestCases for the test: '{this.Name}'");
 
                 TestCasesList.Add(new(this, "TestCaseExample1"));
                 TestCasesList.Add(new(this, "TestCaseExample2"));
             }
 
-            protected virtual void RecoverStatusFromPreviousExecution()
+            protected virtual void RecoverStateFromPreviousExecution()
             {
-                LogManager.LogTestOK($"> Recuperando el estado tras una posible ejecución anterior: '{this.Name}'");
+                LogManager.LogTestOK($"> Retrieving the state after a possible previous execution: '{this.Name}'");
                 DeleteOldTestExecutionOutputFiles();
                 CreateTestOutputDirectories();
             }
 
             protected virtual void SetTestPreconditions()
             {
-                LogManager.LogTestOK($"> Estableciendo las precondiciones del test: '{this.Name}'");
+                LogManager.LogTestOK($"> Setting the test's preconditions: '{this.Name}'");
             }
 
             protected virtual void OnTestStart()
             {
-                LogManager.LogTestOK($"> Iniciando el test: '{this.Name}'");
+                LogManager.LogTestOK($"> Starting the test: '{this.Name}'");
             }
 
             protected virtual void OnTestEnd()
             {
-                if (HasErrors()) Status = TestStatus.Failed;
-                else Status = TestStatus.Passed;
+                if (HasErrors()) State = TestState.Failed;
+                else State = TestState.Passed;
 
-                LogManager.LogTestOK($"> Se han comprobado todos los casos de prueba del test: '{this.Name}'");
+                LogManager.LogTestOK($"> All TestCases in the test have been checked: '{this.Name}'");
 
                 // El log se copiará a la carpeta de Output del test al cerrar el programa, si hay log
                 if (LogManager.ThisExecutionHasLogFileDump()) AppDomain.CurrentDomain.ProcessExit += (sender, args) => CopyLogToTestOutputFile();
@@ -176,14 +176,14 @@ namespace TestFramework.Code
                 string outputDirPath = TestManager.GetOutputRootPath() + "/" + Name;
                 if (Directory.Exists(outputDirPath))
                 {
-                    LogManager.LogTestOK($"> Eliminando el directorio de /Ouput de una ejecucion anterior del test: '{this.Name}'");
+                    LogManager.LogTestOK($"> Deleting the /Output directory from a previous test run: '{this.Name}'");
                     Directory.Delete(outputDirPath, true);
                 }
             }
 
             private void CreateTestOutputDirectories()
             {
-                LogManager.LogTestOK($"> Creando los directorios necesarios para el test: '{this.Name}'");
+                LogManager.LogTestOK($"> Creating the necessary directories for the test: '{this.Name}'");
 
                 string outputRootPath = TestManager.GetOutputRootPath();
 
@@ -199,16 +199,16 @@ namespace TestFramework.Code
 
             private void ExecutionLoop()
             {
-                LogManager.LogTestOK($"> Van a comenzar a probarse todos los casos de prueba del test: '{this.Name}'");
+                LogManager.LogTestOK($"> Testing of all TestCases in this test is about to begin: '{this.Name}'");
 
                 CurrentTestCase = GetNextTestCase();
                 while (CurrentTestCase != null)
                 {
-                    if (CurrentTestCase.Status == TestCase.TestCaseStatus.Testing)
+                    if (CurrentTestCase.State == TestCase.TestCaseState.Testing)
                     {
                         string previousStep = CurrentTestCase.CurrentStep;
 
-                        (string nextStep, float delay) = FlowGraph[previousStep]();
+                        (string nextStep, float delay) = FlowChart[previousStep]();
                         CurrentTestCase.UpdateTestStep(nextStep);
 
                         if (delay >= 0) Thread.Sleep((int)delay * 1000);
@@ -226,7 +226,7 @@ namespace TestFramework.Code
             {
                 foreach (TestCase testCase in TestCasesList)
                 {
-                    if (testCase.Status == TestCase.TestCaseStatus.Testing)
+                    if (testCase.State == TestCase.TestCaseState.Testing)
                     {
                         return testCase;
                     }

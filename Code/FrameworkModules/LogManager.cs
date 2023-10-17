@@ -239,16 +239,16 @@ namespace TestFramework.Code.FrameworkModules
             <html>
             <head>
                 <style>
-                    /* Estilo para los párrafos */
+                    /* Paragraph style */
                     p {
                         margin: 5px 0;
                         font-size: 13px;
                         font-weight: bold;
                         font-family: 'Arial', sans-serif;
                     }
-                    /* Estilo del fondo */
+                    /* Background style */
                     body { background-color: #111; color: white; }
-                    /* Estilos para los diferentes tags de logs */
+                    /* Styles for different log tags */
                     .error { color: rgb(220, 69, 69); }
                     .ok { color: rgb(60, 185, 60); }
                     .warning { color: rgb(220, 180, 80) }
@@ -293,7 +293,7 @@ namespace TestFramework.Code.FrameworkModules
 
                 default:
                     logClassName = "error";
-                    message = "[ERROR: ESTE LOG NO TIENE NINGÚN TIPO DEFINIDO] - " + message;
+                    message = "[ERROR: THIS LOG HAS NO DEFINED TYPE] - " + message;
                     break;
             }
 

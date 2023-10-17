@@ -5,7 +5,7 @@ namespace TestFramework.Code
         using TestFramework.Code.FrameworkModules;
         public class TestCase
         {
-            public enum TestCaseStatus 
+            public enum TestCaseState 
             {
                 Testing,
                 Passed,
@@ -13,12 +13,12 @@ namespace TestFramework.Code
             }
 
             private string _CurrentStep;
-            private TestCaseStatus _Status;
+            private TestCaseState _State;
 
             public FrameworkTest ParentTest { get; }
             public string ID { get; }
             public string CurrentStep{ get => _CurrentStep; }
-            public TestCaseStatus Status { get => _Status; }
+            public TestCaseState State { get => _State; }
             private readonly HashSet<TestError> TestCaseErrors;
 
             public TestCase(FrameworkTest parentTest, string ID)
@@ -26,7 +26,7 @@ namespace TestFramework.Code
                 this.ParentTest = parentTest;
                 this.ID = ID;
                 _CurrentStep = ParentTest.TestCaseInitStepID;
-                _Status = TestCaseStatus.Testing;
+                _State = TestCaseState.Testing;
                 TestCaseErrors = new();
             }
 
@@ -38,8 +38,8 @@ namespace TestFramework.Code
                 }
                 else
                 {
-                    if (HasErrors()) _Status = TestCaseStatus.Failed;
-                    else _Status = TestCaseStatus.Passed;
+                    if (HasErrors()) _State = TestCaseState.Failed;
+                    else _State = TestCaseState.Passed;
                 }
             }
 
@@ -52,7 +52,7 @@ namespace TestFramework.Code
             {
                 if (!TestCaseErrors.Add(testError))
                 {
-                    LogManager.LogTestWarning($"El error con ErrorType '{testError.ErrorID}' introducido esta duplicado, no se ha insertado");
+                    LogManager.LogTestWarning($"The error with ErrorType '{testError.ErrorID}' is duplicated, it hasn't been inserted.");
                 }
             }
 
@@ -63,12 +63,12 @@ namespace TestFramework.Code
 
             protected virtual void OnTestCaseStart()
             {
-                LogManager.LogOK($"> Ha comenzado el TestCase: '{this.ID}'");
+                LogManager.LogOK($"> The TestCase has started: '{this.ID}'");
             }
 
             protected virtual void OnTestCaseEnd()
             {
-                LogManager.LogOK($"> Ha finalizado el TestCase: '{this.ID}'");
+                LogManager.LogOK($"> The TestCase has been completed: '{this.ID}'");
             }
 
             private void ErrorAlreadyExists(TestError newError)

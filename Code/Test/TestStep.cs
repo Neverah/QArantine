@@ -16,12 +16,12 @@ namespace TestFramework.Code
 
             protected virtual void OnTestStepStart()
             {
-                LogManager.LogOK($"> Ha comenzado el TestStep: '{this.ID}'");
+                LogManager.LogOK($"> The TestStep has started: '{this.ID}'");
             }
 
             protected virtual void OnTestStepEnd()
             {
-                LogManager.LogOK($"> Ha finalizado el TestStep: '{this.ID}'");
+                LogManager.LogOK($"> The TestStep has been completed: '{this.ID}'");
             }
         }
     }
