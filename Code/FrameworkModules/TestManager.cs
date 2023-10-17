@@ -3,11 +3,11 @@ using TestFramework.Code.Test;
 
 namespace TestFramework.Code.FrameworkModules
 {
-    public class TestManager
+    public sealed class TestManager
     {
         public FrameworkTest? CurrentTest { get; set; }
         
-        private static string OutputRootPath;
+        private static string? OutputRootPath;
         private CancellationTokenSource? TestCancellationTokenSource;
         private Thread? CurrentTestThread;
 

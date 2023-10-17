@@ -39,7 +39,7 @@ namespace TestFramework.Code
                 TestCasesList = new();
             }
 
-            public void Launch(CancellationToken timeoutToken)
+            public virtual void Launch(CancellationToken timeoutToken)
             {
                 TimeoutToken = timeoutToken;
 
@@ -51,18 +51,18 @@ namespace TestFramework.Code
                 ExecutionLoop();
             }
 
-            public TestError CreateTestError(string errorID)
+            public virtual TestError CreateTestError(string errorID)
             {
                 return new(Name, CurrentTestCase != null ? CurrentTestCase.ID : "UNKNOWN_TEST_CASE", CurrentTestCase != null ? CurrentTestCase.CurrentStep : "UNKNOWN_TEST_STEP", errorID);
             }
 
-            public void ReportTestError(TestError newError)
+            public virtual void ReportTestError(TestError newError)
             {
                 LogManager.LogTestError($"TEST ERROR DETECTED > {newError}");
                 CurrentTestCase?.AddError(newError);
             }
 
-            protected bool HasErrors()
+            protected virtual bool HasErrors()
             {
                 foreach(TestCase testCase in TestCasesList)
                 {
@@ -71,7 +71,7 @@ namespace TestFramework.Code
                 return false;
             }
 
-            protected TestFlowGraph CreateFlowGraph()
+            protected virtual TestFlowGraph CreateFlowGraph()
             {
                 return new TestFlowGraph
                 {
@@ -130,12 +130,12 @@ namespace TestFramework.Code
                 };
             }
 
-            protected void LoadRequiredData()
+            protected virtual void LoadRequiredData()
             {
                 LogManager.LogTestOK($"> Cargando los datos para el test: '{this.Name}'");
             }
 
-            protected void CreateTestCasesList()
+            protected virtual void CreateTestCasesList()
             {
                 LogManager.LogTestOK($"> Creando la lista de casos de prueba del test: '{this.Name}'");
 
@@ -143,24 +143,24 @@ namespace TestFramework.Code
                 TestCasesList.Add(new(this, "TestCaseExample2"));
             }
 
-            protected void RecoverStatusFromPreviousExecution()
+            protected virtual void RecoverStatusFromPreviousExecution()
             {
                 LogManager.LogTestOK($"> Recuperando el estado tras una posible ejecución anterior: '{this.Name}'");
                 DeleteOldTestExecutionOutputFiles();
                 CreateTestOutputDirectories();
             }
 
-            protected void SetTestPreconditions()
+            protected virtual void SetTestPreconditions()
             {
                 LogManager.LogTestOK($"> Estableciendo las precondiciones del test: '{this.Name}'");
             }
 
-            protected void OnTestStart()
+            protected virtual void OnTestStart()
             {
                 LogManager.LogTestOK($"> Iniciando el test: '{this.Name}'");
             }
 
-            protected void OnTestEnd()
+            protected virtual void OnTestEnd()
             {
                 if (HasErrors()) Status = TestStatus.Failed;
                 else Status = TestStatus.Passed;

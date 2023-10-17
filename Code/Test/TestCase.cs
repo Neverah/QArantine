@@ -61,12 +61,12 @@ namespace TestFramework.Code
                 return ID;
             }
 
-            protected void OnTestCaseStart()
+            protected virtual void OnTestCaseStart()
             {
                 LogManager.LogOK($"> Ha comenzado el TestCase: '{this.ID}'");
             }
 
-            protected void OnTestCaseEnd()
+            protected virtual void OnTestCaseEnd()
             {
                 LogManager.LogOK($"> Ha finalizado el TestCase: '{this.ID}'");
             }

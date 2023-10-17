@@ -69,7 +69,7 @@ namespace TestFramework.Code.FrameworkModules
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al leer el archivo: {ex.Message}");
+                LogManager.LogError($"Error al leer el archivo: {ex.Message}");
             }
         }
     }
