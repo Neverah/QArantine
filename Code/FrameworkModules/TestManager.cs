@@ -55,7 +55,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (OutputRootPath != null && OutputRootPath != "") return;
 
-            if ((OutputRootPath = ConfigManager.GetConfigParam("TestFrameworkOutputRootPath")!) == null)
+            if ((OutputRootPath = ConfigManager.GetTFConfigParam("TestFrameworkOutputRootPath")!) == null)
             {
                 LogManager.LogError("Could not find the 'TestFrameworkOutputRootPath' config param, the test can not continue, aborting");
                 Environment.Exit(-1);

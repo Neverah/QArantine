@@ -167,8 +167,39 @@ namespace TestFramework.Code
 
                 LogManager.LogTestOK($"> All TestCases in the test have been checked: '{this.Name}'");
 
+                LogReportOnEnd();
+
                 // El log se copiará a la carpeta de Output del test al cerrar el programa, si hay log
-                if (LogManager.ThisExecutionHasLogFileDump()) AppDomain.CurrentDomain.ProcessExit += (sender, args) => CopyLogToTestOutputFile();
+                if (LogManager.ThisExecutionHasLogFileDump()) AppDomain.CurrentDomain.ProcessExit += (sender, args) => CopyLogsToTestOutputFile();
+            }
+
+            protected virtual void LogReportOnEnd()
+            {
+                LogCoverageOnEnd();
+                LogErrorsOnEnd();
+            }
+
+            protected virtual void LogCoverageOnEnd()
+            {
+                LogManager.LogOK("\n>> Test coverage section:\n");
+                foreach(TestCase testCase in TestCasesList)
+                {
+                    LogManager.LogOK("- " + testCase.ID);
+                }
+            }
+
+            protected virtual void LogErrorsOnEnd()
+            {
+                LogManager.LogOK("\n>> Test errors section:\n");
+                foreach(TestCase testCase in TestCasesList)
+                {
+                    if (testCase.HasErrors())
+                    {
+                        LogManager.LogOK("> " + testCase.ID + ":");
+                        testCase.LogFoundErrors();
+                        LogManager.LogOK("");
+                    }
+                }
             }
 
             private void DeleteOldTestExecutionOutputFiles()
@@ -191,10 +222,11 @@ namespace TestFramework.Code
                 Directory.CreateDirectory(outputRootPath + "/" + Name);
             }
 
-            private void CopyLogToTestOutputFile()
+            private void CopyLogsToTestOutputFile()
             {
                 Thread.Sleep(500);
-                File.Copy(LogManager.GetLogPath(), TestManager.GetOutputRootPath() + "/" + Name + "/" + "Log.html");
+                if (File.Exists(LogManager.GetLogPath())) File.Copy(LogManager.GetLogPath(), TestManager.GetOutputRootPath() + "/" + Name + "/" + "Log.html");
+                if (LogManager.ThisExecutionHasErrorLogFileDump() && File.Exists(LogManager.GetErrorsLogPath())) File.Copy(LogManager.GetErrorsLogPath(), TestManager.GetOutputRootPath() + "/" + Name + "/" + "ErrorsLog.html");
             }
 
             private void ExecutionLoop()

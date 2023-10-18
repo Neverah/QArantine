@@ -20,7 +20,7 @@ namespace TestFramework.Code.FrameworkModules
             LogManager.LogOK("TestFramework Main Config loaded");
         }
 
-        public static string? GetConfigParam(string paramID)
+        public static string? GetTFConfigParam(string paramID)
         {
             if (ConfigParams.TryGetValue(paramID, out string? paramValue))
             {

@@ -6,9 +6,11 @@ namespace TestFramework.Code.FrameworkModules
     public static class LogManager
     {
         private static string LogPath;
-        private static bool LogOpen = false;
-        private static bool DumpToLogFile = false;
+        private static string ErrorsLogPath;
+        private static bool LogsOpen = false;
+        private static bool DumpToLogFiles = false;
         private static StreamWriter? LogFile;
+        private static StreamWriter? ErrorsLogFile;
 
         public enum LogLevel
         {
@@ -26,6 +28,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             LogLvl = LogLevel.Warning;
             LogPath = "";
+            ErrorsLogPath = "";
         }
 
         public static void LogError(string message)
@@ -34,7 +37,7 @@ namespace TestFramework.Code.FrameworkModules
             {
                 PrintConsoleLogTimePrefix();
                 Console.ForegroundColor = ConsoleColor.Red;
-                WriteLog($"[ERROR] {message}", LogLevel.Error);
+                WriteLog($"{message}", LogLevel.Error);
             }
 
             if (LogLvl >= LogLevel.Debug) PrintCallStack();
@@ -46,7 +49,7 @@ namespace TestFramework.Code.FrameworkModules
             {
                 PrintConsoleLogTimePrefix();
                 Console.ForegroundColor = ConsoleColor.Green;
-                WriteLog($"[OK] {message}", LogLevel.OK);
+                WriteLog($"{message}", LogLevel.OK);
             }
         }
 
@@ -56,7 +59,7 @@ namespace TestFramework.Code.FrameworkModules
             {
                 PrintConsoleLogTimePrefix();
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
-                WriteLog($"[WARNING] {message}", LogLevel.Warning);
+                WriteLog($"{message}", LogLevel.Warning);
             }
         }
 
@@ -66,7 +69,7 @@ namespace TestFramework.Code.FrameworkModules
             {
                 PrintConsoleLogTimePrefix();
                 Console.ForegroundColor = ConsoleColor.White;
-                WriteLog($"[DEBUG] {message}", LogLevel.Debug);
+                WriteLog($"{message}", LogLevel.Debug);
             }
         }
 
@@ -77,7 +80,7 @@ namespace TestFramework.Code.FrameworkModules
                 PrintConsoleLogTimePrefix();
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.Red;
-                WriteLog($"[ERROR] {message}", LogLevel.Error, true);
+                WriteLog($"{message}", LogLevel.Error, true);
             }
 
             if (LogLvl >= LogLevel.Debug) PrintCallStack();
@@ -90,7 +93,7 @@ namespace TestFramework.Code.FrameworkModules
                 PrintConsoleLogTimePrefix();
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.Green;
-                WriteLog($"[OK] {message}", LogLevel.OK, true);
+                WriteLog($"{message}", LogLevel.OK, true);
             }
         }
 
@@ -101,7 +104,7 @@ namespace TestFramework.Code.FrameworkModules
                 PrintConsoleLogTimePrefix();
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
-                WriteLog($"[WARNING] {message}", LogLevel.Warning, true);
+                WriteLog($"{message}", LogLevel.Warning, true);
             }
         }
 
@@ -112,33 +115,19 @@ namespace TestFramework.Code.FrameworkModules
                 PrintConsoleLogTimePrefix();
                 PrintConsoleLogTestPrefix();
                 Console.ForegroundColor = ConsoleColor.White;
-                WriteLog($"[DEBUG] {message}", LogLevel.Debug, true);
+                WriteLog($"{message}", LogLevel.Debug, true);
             }
         }
 
         public static void StartLogFile()
         {
-            if(!LogOpen && ThisExecutionHasLogFileDump())
+            if(!LogsOpen && ThisExecutionHasLogFileDump())
             {
                 InitLogLevel();
-                InitLogPath();
-                DeleteOldLogFile();
-                CreateTestLogFile();
-                LogOpen = true;
-                DumpToLogFile = true;
-            }
-        }
-
-        public static void CloseLogFile()
-        {
-            if (LogOpen)
-            {
-                LogFile?.WriteLine("<p class='ok'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>Cerrando el log...</p>");
-                LogFile?.WriteLine("</body>");
-                LogFile?.WriteLine("</html>");
-                DumpToLogFile = false;
-                LogFile?.Close();
-                LogOpen = false;
+                DeleteOldLogFiles();
+                CreateLogFiles();
+                LogsOpen = true;
+                DumpToLogFiles = true;
             }
         }
 
@@ -148,20 +137,61 @@ namespace TestFramework.Code.FrameworkModules
             return LogPath;
         }
 
+        public static string GetErrorsLogPath()
+        {
+            InitErrorsLogPath();
+            return ErrorsLogPath;
+        }
+
         public static bool IsLogFileDumpActive()
         {
-            return DumpToLogFile;
+            return DumpToLogFiles;
         }
 
         public static bool ThisExecutionHasLogFileDump()
         {
-            return ConfigManager.GetConfigParam("DumpLogsToFile") == "true";
+            return ConfigManager.GetTFConfigParam("DumpLogsToFile") == "true";
+        }
+
+        public static bool ThisExecutionHasErrorLogFileDump()
+        {
+            return ThisExecutionHasLogFileDump() && ConfigManager.GetTFConfigParam("ErrorsLogActive") == "true";
+        }
+
+        private static void CloseLogFiles()
+        {
+            DumpToLogFiles = false;
+            CloseLogFile();
+            CloseErrorsLogFile();
+            LogsOpen = false;
+        }
+
+        private static void CloseLogFile()
+        {
+            if (LogsOpen)
+            {
+                LogFile?.WriteLine("<p class='ok'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>Closing the log...</p>");
+                LogFile?.WriteLine("</body>");
+                LogFile?.WriteLine("</html>");
+                LogFile?.Close();
+            }
+        }
+
+        private static void CloseErrorsLogFile()
+        {
+            if (LogsOpen && ThisExecutionHasErrorLogFileDump())
+            {
+                ErrorsLogFile?.WriteLine("<p class='ok'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>Closing the errors log...</p>");
+                ErrorsLogFile?.WriteLine("</body>");
+                ErrorsLogFile?.WriteLine("</html>");
+                ErrorsLogFile?.Close();
+            }
         }
 
         private static void InitLogLevel()
         {
             string logLvlName;
-            if ((logLvlName = ConfigManager.GetConfigParam("LogLevel")!) == null)
+            if ((logLvlName = ConfigManager.GetTFConfigParam("LogLevel")!) == null)
             {
                 LogError("Could not find the 'LogLevel' config param, the log can not be opened, aborting execution");
                 Environment.Exit(-1);
@@ -174,13 +204,29 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogPath != null && LogPath != "") return;
 
-            if ((LogPath = ConfigManager.GetConfigParam("LogPath")!) == null)
+            if ((LogPath = ConfigManager.GetTFConfigParam("LogPath")!) == null)
             {
-                LogError("Could not find the 'LogPath' config param, the log can not be opened, aborting execution");
+                LogError("Could not find the 'LogPath' config param. The log can not be opened, aborting execution");
                 Environment.Exit(-1);
             }
             
             if (!Path.IsPathRooted(LogPath)) LogPath = Path.Combine(Environment.CurrentDirectory, LogPath);
+        }
+
+        private static void InitErrorsLogPath()
+        {
+            if (ErrorsLogPath != null && ErrorsLogPath != "") return;
+
+            if (ThisExecutionHasErrorLogFileDump())
+            {
+                if ((ErrorsLogPath = ConfigManager.GetTFConfigParam("ErrorsLogPath")!) == null)
+                {
+                    LogError("Could not find the 'ErrorsLogPath' config param, but the 'ErrorsLogActive' config param is set to 'true'. The errors log can not be opened, aborting execution");
+                    Environment.Exit(-1);
+                }
+                
+                if (!Path.IsPathRooted(ErrorsLogPath)) ErrorsLogPath = Path.Combine(Environment.CurrentDirectory, ErrorsLogPath);
+            }
         }
 
         private static void PrintCallStack()
@@ -225,14 +271,34 @@ namespace TestFramework.Code.FrameworkModules
             return "|" + TimeManager.AppClock.Elapsed.TotalSeconds.ToString("0.00") + "| ";
         }
 
-        private static void DeleteOldLogFile()
+        private static void DeleteOldLogFiles()
         {
-            if (File.Exists(LogPath)) File.Delete(LogPath);
+            if (File.Exists(GetLogPath())) File.Delete(GetLogPath());
+            if (File.Exists(GetErrorsLogPath())) File.Delete(GetErrorsLogPath());
         }
 
-        private static void CreateTestLogFile()
+        private static void CreateLogFiles()
         {
-            LogFile = new(LogPath, append: true);
+            CreateLogFile();
+            CreateErrorsLogFile();
+
+            // Event handler for closing the log on program exit
+            AppDomain.CurrentDomain.ProcessExit += (sender, args) => CloseLogFiles();
+        }
+
+        private static void CreateLogFile()
+        {
+            CreateGenericLogFile(GetLogPath(), out LogFile);
+        }
+
+        private static void CreateErrorsLogFile()
+        {
+            if (ThisExecutionHasErrorLogFileDump()) CreateGenericLogFile(GetErrorsLogPath(), out ErrorsLogFile);
+        }
+
+        private static void CreateGenericLogFile(string logPath, out StreamWriter outLogWriter)
+        {
+            outLogWriter = new(logPath, append: true);
 
             string htmlHeader = @"
             <!DOCTYPE html>
@@ -258,19 +324,25 @@ namespace TestFramework.Code.FrameworkModules
                 </style>
             </head>
             <body>";
-            LogFile.WriteLine(htmlHeader);
-
-            // Manejador de eventos para cerrar el log en el cierre de la aplicación
-            AppDomain.CurrentDomain.ProcessExit += (sender, args) => CloseLogFile();
+            outLogWriter.WriteLine(htmlHeader);
         }
 
         private static void WriteLog(string message, LogLevel lvl, bool printPrefixOnFile = false)
         {
             Console.WriteLine(message);
-            if (DumpToLogFile) WriteLogOnFile(message, lvl, printPrefixOnFile);
+            if (DumpToLogFiles && LogsOpen) 
+            {
+                WriteLogOnLogFiles(message, lvl, printPrefixOnFile);
+            }
         }
 
-        private static void WriteLogOnFile(string message, LogLevel lvl, bool printPrefix)
+        private static void WriteLogOnLogFiles(string message, LogLevel lvl, bool printPrefix)
+        {
+            WriteLogOnLogFile(LogFile!, message, lvl, printPrefix);
+            if(lvl == LogLevel.Error) WriteLogOnLogFile(ErrorsLogFile!, message, lvl, false);
+        }
+
+        private static void WriteLogOnLogFile(StreamWriter logFile, string message, LogLevel lvl, bool printPrefix)
         {
             string logClassName;
             switch (lvl)
@@ -297,8 +369,8 @@ namespace TestFramework.Code.FrameworkModules
                     break;
             }
 
-            if (printPrefix) LogFile?.WriteLine("<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span><span class='test-log-prefix'>" + GetLogTestPrefix(true) + "</span> " + message + "</p>");
-            else LogFile?.WriteLine("<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>" + message + "</p>");
+            if (printPrefix) logFile?.WriteLine("<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span><span class='test-log-prefix'>" + GetLogTestPrefix(true) + "</span> " + message + "</p>");
+            else logFile?.WriteLine("<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>" + message + "</p>");
         }
     }
 }

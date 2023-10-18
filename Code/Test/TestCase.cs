@@ -43,16 +43,24 @@ namespace TestFramework.Code
                 }
             }
 
-            public bool HasErrors()
+            public virtual bool HasErrors()
             {
                 return TestCaseErrors.Count > 0;
             }
 
-            public void AddError(TestError testError)
+            public virtual void AddError(TestError testError)
             {
                 if (!TestCaseErrors.Add(testError))
                 {
                     LogManager.LogTestWarning($"The error with ErrorType '{testError.ErrorID}' is duplicated, it hasn't been inserted.");
+                }
+            }
+
+            public virtual void LogFoundErrors()
+            {
+                foreach(TestError testError in TestCaseErrors)
+                {
+                    LogManager.LogError("- " + testError.ToString());
                 }
             }
 
@@ -69,11 +77,6 @@ namespace TestFramework.Code
             protected virtual void OnTestCaseEnd()
             {
                 LogManager.LogOK($"> The TestCase has been completed: '{this.ID}'");
-            }
-
-            private void ErrorAlreadyExists(TestError newError)
-            {
-
             }
         }
     }
