@@ -155,16 +155,20 @@ namespace TestFramework.Code.FrameworkModules
 
         public static void StartLogFile()
         {
-            if(!LogsOpen && ThisExecutionHasLogFileDump())
+            if(!LogsOpen)
             {
-                InitLogLevel();
-                DeleteOldLogFiles();
-                CreateLogFiles();
-                LogsOpen = true;
-                DumpToLogFiles = true;
+                InitActiveLogs();
+                if (ThisExecutionHasLogFileDump())
+                {
+                    InitLogLevel();
+                    DeleteOldLogFiles();
+                    CreateLogFiles();
+                    LogsOpen = true;
+                    DumpToLogFiles = true;
 
-                StartFlushLoop();
-                StartLogCloseEvent();
+                    StartFlushLoop();
+                    StartLogCloseEvent();
+                }
             }
         }
 

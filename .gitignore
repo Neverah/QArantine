@@ -4,4 +4,4 @@
 
 # Framework output
 /TestsOutput/*
-/Log.html
+*Log.html
