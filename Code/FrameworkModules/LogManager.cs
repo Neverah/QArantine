@@ -7,11 +7,13 @@ namespace TestFramework.Code.FrameworkModules
     {
         private static string LogPath;
         private static string ErrorsLogPath;
-        private static bool LogsOpen = false;
-        private static bool DumpToLogFiles = false;
+        private static bool LogsOpen;
+        private static bool DumpToLogFiles;
+        private static bool HasLogFileDump;
+        private static bool HasErrorLogFileDump;
         private static StreamWriter? LogFile;
         private static StreamWriter? ErrorsLogFile;
-        private static Timer FlushTimer;
+        private static Timer? FlushTimer;
 
         public enum LogLevel
         {
@@ -31,6 +33,11 @@ namespace TestFramework.Code.FrameworkModules
             LogLvl = LogLevel.Warning;
             LogPath = "";
             ErrorsLogPath = "";
+
+            LogsOpen = false;
+            DumpToLogFiles = false;
+            HasLogFileDump = false;
+            HasErrorLogFileDump = false;
         }
 
         public static void LogFatalError(string message)
@@ -180,12 +187,12 @@ namespace TestFramework.Code.FrameworkModules
 
         public static bool ThisExecutionHasLogFileDump()
         {
-            return ConfigManager.GetTFConfigParam("DumpLogsToFile") == "true";
+            return HasLogFileDump;
         }
 
         public static bool ThisExecutionHasErrorLogFileDump()
         {
-            return ThisExecutionHasLogFileDump() && ConfigManager.GetTFConfigParam("ErrorsLogActive") == "true";
+            return HasErrorLogFileDump;
         }
 
         private static void CloseLogFiles()
@@ -228,6 +235,15 @@ namespace TestFramework.Code.FrameworkModules
             }
 
             LogLvl = (LogLevel)Enum.Parse(typeof(LogLevel), logLvlName);
+        }
+
+        private static void InitActiveLogs()
+        {
+            HasLogFileDump = ConfigManager.GetTFConfigParam("DumpLogsToFile") == "true";
+            if (HasLogFileDump)
+            {
+                 HasErrorLogFileDump = ConfigManager.GetTFConfigParam("ErrorsLogActive") == "true";
+            }
         }
 
         private static void InitLogPath()
