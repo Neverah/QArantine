@@ -11,10 +11,12 @@ namespace TestFramework.Code.FrameworkModules
         private static bool DumpToLogFiles = false;
         private static StreamWriter? LogFile;
         private static StreamWriter? ErrorsLogFile;
+        private static Timer FlushTimer;
 
         public enum LogLevel
         {
             None,
+            FatalError,
             Error,
             OK,
             Warning,
@@ -29,6 +31,18 @@ namespace TestFramework.Code.FrameworkModules
             LogLvl = LogLevel.Warning;
             LogPath = "";
             ErrorsLogPath = "";
+        }
+
+        public static void LogFatalError(string message)
+        {
+            if (LogLvl >= LogLevel.FatalError)
+            {
+                PrintConsoleLogTimePrefix();
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                WriteLog($"{message}", LogLevel.FatalError);
+
+                PrintFatalErrorCallStack();
+            }
         }
 
         public static void LogError(string message)
@@ -70,6 +84,19 @@ namespace TestFramework.Code.FrameworkModules
                 PrintConsoleLogTimePrefix();
                 Console.ForegroundColor = ConsoleColor.White;
                 WriteLog($"{message}", LogLevel.Debug);
+            }
+        }
+
+        public static void LogTestFatalError(string message)
+        {
+            if (LogLvl >= LogLevel.FatalError)
+            {
+                PrintConsoleLogTimePrefix();
+                PrintConsoleLogTestPrefix();
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                WriteLog($"{message}", LogLevel.FatalError, true);
+
+                PrintFatalErrorCallStack();
             }
         }
 
@@ -128,6 +155,9 @@ namespace TestFramework.Code.FrameworkModules
                 CreateLogFiles();
                 LogsOpen = true;
                 DumpToLogFiles = true;
+
+                StartFlushLoop();
+                StartLogCloseEvent();
             }
         }
 
@@ -244,6 +274,21 @@ namespace TestFramework.Code.FrameworkModules
             WriteLog("}", LogLevel.Debug);
         }
 
+        private static void PrintFatalErrorCallStack()
+        {
+            StackTrace stackTrace = new();
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            WriteLog("\nCall Stack:\n{", LogLevel.FatalError);
+            for (int i = 0; i < stackTrace.FrameCount; i++)
+            {
+                StackFrame? frame = stackTrace.GetFrame(i);
+                MethodBase? method = frame.GetMethod();
+                WriteLog($"\t- {method?.DeclaringType}.{method?.Name}", LogLevel.FatalError);
+            }
+            WriteLog("}", LogLevel.FatalError);
+        }
+
         private static void PrintConsoleLogTimePrefix()
         {
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -260,15 +305,15 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (TestManager?.CurrentTest != null && TestManager?.CurrentTest?.CurrentTestCase != null)
             {
-                if (isForHTML) return $"&lt;{TestManager?.CurrentTest.CurrentTestCase.ID}:{TestManager?.CurrentTest.CurrentTestCase.CurrentStep}&gt; ";
-                else return $"<{TestManager?.CurrentTest.CurrentTestCase.ID}:{TestManager?.CurrentTest.CurrentTestCase.CurrentStep}> ";
+                if (isForHTML) return $"&lt;[T]:{TestManager?.CurrentTest.CurrentTestCase.ID}:{TestManager?.CurrentTest.CurrentTestCase.CurrentStep}&gt; ";
+                else return $"<[T]:{TestManager?.CurrentTest.CurrentTestCase.ID}:{TestManager?.CurrentTest.CurrentTestCase.CurrentStep}> ";
             }
             return "";
         }
 
         private static string GetFormatedElapsedTime()
         {
-            return "|" + TimeManager.AppClock.Elapsed.TotalSeconds.ToString("0.00") + "| ";
+            return "|" + TimeManager.AppClock.Elapsed.TotalSeconds.ToString("0.000") + "| ";
         }
 
         private static void DeleteOldLogFiles()
@@ -281,9 +326,6 @@ namespace TestFramework.Code.FrameworkModules
         {
             CreateLogFile();
             CreateErrorsLogFile();
-
-            // Event handler for closing the log on program exit
-            AppDomain.CurrentDomain.ProcessExit += (sender, args) => CloseLogFiles();
         }
 
         private static void CreateLogFile()
@@ -315,6 +357,7 @@ namespace TestFramework.Code.FrameworkModules
                     /* Background style */
                     body { background-color: #111; color: white; }
                     /* Styles for different log tags */
+                    .fatal-error { color: rgb(180, 65, 65); }
                     .error { color: rgb(220, 69, 69); }
                     .ok { color: rgb(60, 185, 60); }
                     .warning { color: rgb(220, 180, 80) }
@@ -327,26 +370,51 @@ namespace TestFramework.Code.FrameworkModules
             outLogWriter.WriteLine(htmlHeader);
         }
 
+        private static void StartFlushLoop()
+        {
+            string logsFlushPeriod;
+            if ((logsFlushPeriod = ConfigManager.GetTFConfigParam("LogsFlushPeriod")!) == null)
+            {
+                LogError("Could not find the 'LogsFlushPeriod' config param. The logs can not be opened, aborting execution");
+                Environment.Exit(-1);
+            }
+            FlushTimer = new Timer(FlushLogFiles!, null, 0, int.Parse(logsFlushPeriod));
+        }
+
+        private static void StartLogCloseEvent()
+        {
+            // Event handler for closing the log on program exit
+            AppDomain.CurrentDomain.ProcessExit += (sender, args) => CloseLogFiles();
+        }
+
         private static void WriteLog(string message, LogLevel lvl, bool printPrefixOnFile = false)
         {
             Console.WriteLine(message);
             if (DumpToLogFiles && LogsOpen) 
             {
-                WriteLogOnLogFiles(message, lvl, printPrefixOnFile);
+                string[] lines = message.Split('\n');
+                foreach (string line in lines) WriteLogOnLogFiles(line, lvl, printPrefixOnFile);
             }
         }
 
         private static void WriteLogOnLogFiles(string message, LogLevel lvl, bool printPrefix)
         {
             WriteLogOnLogFile(LogFile!, message, lvl, printPrefix);
-            if(lvl == LogLevel.Error) WriteLogOnLogFile(ErrorsLogFile!, message, lvl, false);
+            if(lvl <= LogLevel.Error && ThisExecutionHasErrorLogFileDump()) WriteLogOnLogFile(ErrorsLogFile!, message, lvl, false);
         }
 
         private static void WriteLogOnLogFile(StreamWriter logFile, string message, LogLevel lvl, bool printPrefix)
         {
             string logClassName;
+
+            message = message.Replace("<", "&lt;").Replace(">", "&gt;");
+
             switch (lvl)
             {
+                case LogLevel.FatalError:
+                    logClassName = "fatal-error";
+                    break;
+
                 case LogLevel.Error:
                     logClassName = "error";
                     break;
@@ -371,6 +439,17 @@ namespace TestFramework.Code.FrameworkModules
 
             if (printPrefix) logFile?.WriteLine("<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span><span class='test-log-prefix'>" + GetLogTestPrefix(true) + "</span> " + message + "</p>");
             else logFile?.WriteLine("<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>" + message + "</p>");
+        }
+
+        private static void FlushLogFiles(object state)
+        {
+            FlushLogFile(LogFile!);
+            if(ThisExecutionHasErrorLogFileDump()) FlushLogFile(ErrorsLogFile!);
+        }
+
+        private static void FlushLogFile(StreamWriter logFile)
+        {
+            logFile.Flush();
         }
     }
 }

@@ -6,7 +6,7 @@ class Program
         // Verificar si se proporcionó al menos un argumento
         if (args.Length <= 0)
         {
-            LogManager.LogError("Please provide the name of the test class you want to execute as an input parameter");
+            LogManager.LogFatalError("Please provide the name of the test class you want to execute as an input parameter");
             Environment.Exit(-1);
         }
         

@@ -57,7 +57,7 @@ namespace TestFramework.Code.FrameworkModules
 
             if ((OutputRootPath = ConfigManager.GetTFConfigParam("TestFrameworkOutputRootPath")!) == null)
             {
-                LogManager.LogError("Could not find the 'TestFrameworkOutputRootPath' config param, the test can not continue, aborting");
+                LogManager.LogFatalError("Could not find the 'TestFrameworkOutputRootPath' config param, the test can not continue, aborting");
                 Environment.Exit(-1);
             }
             
@@ -68,7 +68,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (testClassName == null)
             {
-                LogManager.LogError($"The test class to be executed has not been specified.");
+                LogManager.LogFatalError($"The test class to be executed has not been specified.");
                 return null;
             }
             string fullTestClassName = "TestFramework.FrameworkTests." + testClassName;
@@ -76,7 +76,7 @@ namespace TestFramework.Code.FrameworkModules
             Type? testClass = Type.GetType(fullTestClassName);
             if (testClass == null)
             {
-                LogManager.LogError($"No test with the specified class has been found: {fullTestClassName}");
+                LogManager.LogFatalError($"No test with the specified class has been found: {fullTestClassName}");
                 return null;
             }
 
@@ -88,7 +88,7 @@ namespace TestFramework.Code.FrameworkModules
             FrameworkTest? testInstance = (FrameworkTest?)Activator.CreateInstance(testClass);
             if (testInstance == null)
             {
-                LogManager.LogError($"An instance of the test class could not be created: {testClass.Name}");
+                LogManager.LogFatalError($"An instance of the test class could not be created: {testClass.Name}");
                 return null;
             }
             return testInstance;
@@ -99,7 +99,7 @@ namespace TestFramework.Code.FrameworkModules
             MethodInfo? testLaunchMethod = testClass.GetMethod("Launch");
             if (testLaunchMethod == null)
             {
-                LogManager.LogError($"The 'Launch' method was not found in the test class: {testClass.Name}");
+                LogManager.LogFatalError($"The 'Launch' method was not found in the test class: {testClass.Name}");
                 return null;
             }
             return testLaunchMethod;
@@ -143,7 +143,7 @@ namespace TestFramework.Code.FrameworkModules
                     // Si el test no se ha cerrado tras 10s, se fuerza el fin de su Thread
                     if(!(CurrentTestThread?.Join(10000) ?? true))
                     {
-                        LogManager.LogError($"The test '{CurrentTest?.Name}' did not close properly after 10 seconds of sending the signal. The program will be closed");
+                        LogManager.LogFatalError($"The test '{CurrentTest?.Name}' did not close properly after 10 seconds of sending the signal. The program will be closed");
                         Environment.Exit(-2);
                     }
                     return;
