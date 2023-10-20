@@ -19,7 +19,7 @@ namespace TestFramework.Code
             public string ID { get; }
             public string CurrentStep{ get => _CurrentStep; }
             public TestCaseState State { get => _State; }
-            private readonly HashSet<TestError> TestCaseErrors;
+            public HashSet<TestError> TestCaseErrors { get; }
 
             public TestCase(FrameworkTest parentTest, string ID)
             {

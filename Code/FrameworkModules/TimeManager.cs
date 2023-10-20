@@ -6,8 +6,17 @@ namespace TestFramework.Code.FrameworkModules
 {
     public class TimeManager
     {
-        public static Stopwatch AppClock = new Stopwatch();
+        public static Stopwatch AppClock { get; }
 
-        static TimeManager() => AppClock.Start();
+        static TimeManager()
+        {
+            AppClock = new();
+            AppClock.Start();
+        }
+
+        public static string GetAppElapsedTimeAsString()
+        {
+            return AppClock.Elapsed.TotalSeconds.ToString("0.000");
+        }
     }
 }

@@ -7,21 +7,29 @@ namespace TestFramework.Code
         {
             public TestCase ParentTestCase { get; }
             public string ID { get; }
+            public HashSet<(string, object)> StepFieldsList { get; }
 
             public TestStep(TestCase parentTestCase, string ID)
             {
-                this.ParentTestCase = parentTestCase;
+                ParentTestCase = parentTestCase;
                 this.ID = ID;
+                StepFieldsList = new();
+            }
+
+            public TestStep AddField((string, object) newField)
+            {
+                StepFieldsList.Add(newField);
+                return this;
             }
 
             protected virtual void OnTestStepStart()
             {
-                LogManager.LogOK($"> The TestStep has started: '{this.ID}'");
+                LogManager.LogOK($"> The TestStep has started: '{ID}'");
             }
 
             protected virtual void OnTestStepEnd()
             {
-                LogManager.LogOK($"> The TestStep has been completed: '{this.ID}'");
+                LogManager.LogOK($"> The TestStep has been completed: '{ID}'");
             }
         }
     }

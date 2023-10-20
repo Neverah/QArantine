@@ -333,7 +333,7 @@ namespace TestFramework.Code.FrameworkModules
 
         private static string GetFormatedElapsedTime()
         {
-            return "|" + TimeManager.AppClock.Elapsed.TotalSeconds.ToString("0.000") + "| ";
+            return "|" + TimeManager.GetAppElapsedTimeAsString() + "| ";
         }
 
         private static void DeleteOldLogFiles()

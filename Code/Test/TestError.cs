@@ -1,3 +1,5 @@
+using TestFramework.Code.FrameworkUtils;
+
 namespace TestFramework.Code
 {
     namespace Test
@@ -8,7 +10,7 @@ namespace TestFramework.Code
             public string TestCaseName { get; }
             public string TestStepName { get; }
             public string ErrorID { get; }
-            public HashSet<(string, object)> ExtraFieldsList { get; }
+            public Dictionary<string, object> ExtraFields { get; }
 
             public TestError(string testName, string testCaseName, string testStepName, string errorID)
             {
@@ -16,18 +18,18 @@ namespace TestFramework.Code
                 TestCaseName = testCaseName;
                 TestStepName = testStepName;
                 ErrorID = errorID;
-                ExtraFieldsList = new();
+                ExtraFields = new();
             }
 
-            public TestError AddExtraField((string, object) extraField)
+            public TestError AddExtraField(string extraFieldID, object extraFieldValue)
             {
-                ExtraFieldsList.Add(extraField);
+                ExtraFields.Add(extraFieldID, extraFieldValue);
                 return this;
             }
 
             public override bool Equals(object? obj)
             {
-                if(obj == null || !(obj is TestError)) return false;
+                if(obj == null || obj is not TestError) return false;
 
                 var castedObj = (TestError)obj;
 
@@ -35,10 +37,7 @@ namespace TestFramework.Code
                 if (TestCaseName != castedObj.TestCaseName) return false;
                 if (ErrorID != castedObj.ErrorID) return false;
 
-                foreach ((string, object) extraField in ExtraFieldsList)
-                {
-                    if(!castedObj.ExtraFieldsList.Contains(extraField)) return false;
-                }
+                if(!ExtraFields.DictionaryEquals(castedObj.ExtraFields)) return false;
 
                 return true;
             }
@@ -51,9 +50,10 @@ namespace TestFramework.Code
                 hashCode = hashCode * 23 + (TestCaseName?.GetHashCode() ?? 0);
                 hashCode = hashCode * 23 + (ErrorID?.GetHashCode() ?? 0);
 
-                foreach ((string, object) extraField in ExtraFieldsList)
+                foreach (string extraFieldKey in ExtraFields.Keys)
                 {
-                    hashCode = hashCode * 23 + extraField.GetHashCode();
+                    hashCode = hashCode * 23 + extraFieldKey.GetHashCode();
+                    hashCode = hashCode * 23 + (ExtraFields.TryGetValue(extraFieldKey, out var extraFieldValue) ? extraFieldValue.GetHashCode() : 0);
                 }
 
                 return hashCode;
@@ -63,12 +63,12 @@ namespace TestFramework.Code
             {
                 string resultString = ErrorID + ";" + TestName + ";" + TestCaseName + ";" + TestStepName;
 
-                if (ExtraFieldsList.Count > 0)
+                if (ExtraFields.Count > 0)
                 {
                     resultString += " > ";
-                    foreach ((string, object) extraField in ExtraFieldsList)
+                    foreach (string extraFieldKey in ExtraFields.Keys)
                     {
-                        resultString += extraField.Item1 + ": " + extraField.Item2 + ";";
+                        resultString += extraFieldKey + ": " + (ExtraFields.TryGetValue(extraFieldKey, out var extraFieldValue) ? extraFieldValue.ToString() : "") + ";";
                     }
                     resultString = resultString[..^1];
                 }

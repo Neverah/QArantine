@@ -2,6 +2,8 @@ namespace TestFramework.Code
 {
     namespace Test
     {
+        using System.Text.Json;
+        using System.Text.Json.Serialization;
         using TestFramework.Code.FrameworkModules;
         using TestFlowChart = Dictionary<string, Func<(String, float)>>;
         public abstract class FrameworkTest
@@ -97,17 +99,17 @@ namespace TestFramework.Code
                             ReportTestError(CreateTestError("EXAMPLE_OF_SIMPLE_ERROR"));
                             LogManager.LogTestOK($"An example of an extended error report (with additional fields):");
                             ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR")
-                                .AddExtraField(("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
-                                .AddExtraField(("1 + 1", 1 + 1))
-                                .AddExtraField(("Value Of PI", Math.PI))
-                                .AddExtraField(("Roses are", "Blue"))
+                                .AddExtraField("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
+                                .AddExtraField("1 + 1", 1 + 1)
+                                .AddExtraField("Value Of PI", Math.PI)
+                                .AddExtraField("Roses are", "Blue")
                             );
                             LogManager.LogTestOK($"Two errors in the same TestCase with all their fields being the same (excluding the TestStep) are considered equal, and duplicates are discarded");
                             ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR")
-                                .AddExtraField(("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")))
-                                .AddExtraField(("1 + 1", 1 + 1))
-                                .AddExtraField(("Value Of PI", Math.PI))
-                                .AddExtraField(("Roses are", "Blue"))
+                                .AddExtraField("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
+                                .AddExtraField("1 + 1", 1 + 1)
+                                .AddExtraField("Value Of PI", Math.PI)
+                                .AddExtraField("Roses are", "Blue")
                             );
                             return ("WaitExample", 0f);
                         } 
@@ -165,9 +167,10 @@ namespace TestFramework.Code
                 if (HasErrors()) State = TestState.Failed;
                 else State = TestState.Passed;
 
-                LogManager.LogTestOK($"> All TestCases in the test have been checked: '{this.Name}'");
+                LogManager.LogTestOK($"> The test has finished: '{this.Name}'");
 
                 LogReportOnEnd();
+                PrintErrorsToJSONFile();
 
                 // El log se copiará a la carpeta de Output del test al cerrar el programa, si hay log
                 if (LogManager.ThisExecutionHasLogFileDump()) AppDomain.CurrentDomain.ProcessExit += (sender, args) => CopyLogsToTestOutputFile();
@@ -182,6 +185,7 @@ namespace TestFramework.Code
             protected virtual void LogCoverageOnEnd()
             {
                 LogManager.LogOK("\n>> Test coverage section:\n");
+                LogManager.LogOK("> TestCases:");
                 foreach(TestCase testCase in TestCasesList)
                 {
                     LogManager.LogOK("- " + testCase.ID);
@@ -207,14 +211,14 @@ namespace TestFramework.Code
                 string outputDirPath = TestManager.GetOutputRootPath() + "/" + Name;
                 if (Directory.Exists(outputDirPath))
                 {
-                    LogManager.LogTestOK($"> Deleting the /Output directory from a previous test run: '{this.Name}'");
+                    LogManager.LogTestOK($"> Deleting the /Output directory from a previous test run: '{Name}'");
                     Directory.Delete(outputDirPath, true);
                 }
             }
 
             private void CreateTestOutputDirectories()
             {
-                LogManager.LogTestOK($"> Creating the necessary directories for the test: '{this.Name}'");
+                LogManager.LogTestOK($"> Creating the necessary directories for the test: '{Name}'");
 
                 string outputRootPath = TestManager.GetOutputRootPath();
 
@@ -225,8 +229,25 @@ namespace TestFramework.Code
             private void CopyLogsToTestOutputFile()
             {
                 Thread.Sleep(500);
-                if (File.Exists(LogManager.GetLogPath())) File.Copy(LogManager.GetLogPath(), TestManager.GetOutputRootPath() + "/" + Name + "/" + "Log.html");
-                if (LogManager.ThisExecutionHasErrorLogFileDump() && File.Exists(LogManager.GetErrorsLogPath())) File.Copy(LogManager.GetErrorsLogPath(), TestManager.GetOutputRootPath() + "/" + Name + "/" + "ErrorsLog.html");
+                if (File.Exists(LogManager.GetLogPath())) File.Copy(LogManager.GetLogPath(), TestManager.GetOutputRootPath() + "/" + Name + "/Log.html");
+                if (LogManager.ThisExecutionHasErrorLogFileDump() && File.Exists(LogManager.GetErrorsLogPath())) File.Copy(LogManager.GetErrorsLogPath(), TestManager.GetOutputRootPath() + "/" + Name + "/ErrorsLog.html");
+            }
+
+            private void PrintErrorsToJSONFile()
+            {
+                string? jsonDumpActive = ConfigManager.GetTFConfigParam("DumpErrorsToJSONFile");
+                if ( jsonDumpActive == null || jsonDumpActive != "true") { return; }
+
+                List<TestError> errorsList = new();
+                foreach(TestCase testCase in TestCasesList)
+                {
+                    errorsList.AddRange(testCase.TestCaseErrors);
+                }
+
+                using (StreamWriter errorsWriter = new(TestManager.GetOutputRootPath() + "/" + Name + "/TestFoundErrors.json"))
+                {
+                    errorsWriter.Write(JsonSerializer.Serialize(errorsList, new JsonSerializerOptions { WriteIndented = true }));
+                }
             }
 
             private void ExecutionLoop()
@@ -236,6 +257,9 @@ namespace TestFramework.Code
                 CurrentTestCase = GetNextTestCase();
                 while (CurrentTestCase != null)
                 {
+                    // If a timeout has been requested, the test will fail, stop, and an attempt will be made to perform a controlled shutdown
+                    if (CheckForcedCloseTokenSignal()) break;
+
                     if (CurrentTestCase.State == TestCase.TestCaseState.Testing)
                     {
                         string previousStep = CurrentTestCase.CurrentStep;
@@ -264,6 +288,18 @@ namespace TestFramework.Code
                     }
                 }
                 return null;
+            }
+
+            private bool CheckForcedCloseTokenSignal()
+            {
+                if (TimeoutToken.IsCancellationRequested)
+                {
+                    LogManager.LogTestError($"The test '{Name}' has reached the timeout, and its cancellation has been requested. An attempt will be made to perform a controlled shutdown");
+                    ReportTestError(CreateTestError("TEST_TIMEOUT")
+                        .AddExtraField("TestExecutionTime", TimeManager.GetAppElapsedTimeAsString())
+                    );
+                }
+                return TimeoutToken.IsCancellationRequested;
             }
         }
     }
