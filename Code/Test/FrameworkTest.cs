@@ -170,6 +170,7 @@ namespace TestFramework.Code
                 LogManager.LogTestOK($"> The test has finished: '{this.Name}'");
 
                 LogReportOnEnd();
+                PrintCoverageToJSONFile();
                 PrintErrorsToJSONFile();
 
                 // El log se copiará a la carpeta de Output del test al cerrar el programa, si hay log
@@ -224,6 +225,7 @@ namespace TestFramework.Code
 
                 Directory.CreateDirectory(outputRootPath);
                 Directory.CreateDirectory(outputRootPath + "/" + Name);
+                Directory.CreateDirectory(outputRootPath + "/" + Name + "/Coverage");
             }
 
             private void CopyLogsToTestOutputFile()
@@ -233,10 +235,25 @@ namespace TestFramework.Code
                 if (LogManager.ThisExecutionHasErrorLogFileDump() && File.Exists(LogManager.GetErrorsLogPath())) File.Copy(LogManager.GetErrorsLogPath(), TestManager.GetOutputRootPath() + "/" + Name + "/ErrorsLog.html");
             }
 
+            private void PrintCoverageToJSONFile()
+            {
+                if (!ConfigManager.GetTFConfigParamAsBool("DumpCoverageToJSONFile")) return;
+
+                List<string> testedCasesList = new();
+                foreach(TestCase testCase in TestCasesList)
+                {
+                    testedCasesList.Add(testCase.ID);
+                }
+
+                using (StreamWriter errorsWriter = new(TestManager.GetOutputRootPath() + "/" + Name + "/Coverage/TestedTestCases.json"))
+                {
+                    errorsWriter.Write(JsonSerializer.Serialize(testedCasesList, new JsonSerializerOptions { WriteIndented = TestManager.ShouldIndentReportSystemJsonFiles() }));
+                }
+            }
+
             private void PrintErrorsToJSONFile()
             {
-                string? jsonDumpActive = ConfigManager.GetTFConfigParam("DumpErrorsToJSONFile");
-                if ( jsonDumpActive == null || jsonDumpActive != "true") { return; }
+                if (!ConfigManager.GetTFConfigParamAsBool("DumpErrorsToJSONFile")) return;
 
                 List<TestError> errorsList = new();
                 foreach(TestCase testCase in TestCasesList)
@@ -246,7 +263,7 @@ namespace TestFramework.Code
 
                 using (StreamWriter errorsWriter = new(TestManager.GetOutputRootPath() + "/" + Name + "/TestFoundErrors.json"))
                 {
-                    errorsWriter.Write(JsonSerializer.Serialize(errorsList, new JsonSerializerOptions { WriteIndented = true }));
+                    errorsWriter.Write(JsonSerializer.Serialize(errorsList, new JsonSerializerOptions { WriteIndented = TestManager.ShouldIndentReportSystemJsonFiles() }));
                 }
             }
 

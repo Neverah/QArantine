@@ -232,7 +232,7 @@ namespace TestFramework.Code.FrameworkModules
         private static void InitLogLevel()
         {
             string logLvlName;
-            if ((logLvlName = ConfigManager.GetTFConfigParam("LogLevel")!) == null)
+            if ((logLvlName = ConfigManager.GetTFConfigParamAsString("LogLevel")!) == null)
             {
                 LogError("Could not find the 'LogLevel' config param, the log can not be opened, aborting execution");
                 Environment.Exit(-1);
@@ -243,10 +243,10 @@ namespace TestFramework.Code.FrameworkModules
 
         private static void InitActiveLogs()
         {
-            HasLogFileDump = ConfigManager.GetTFConfigParam("DumpLogsToFile") == "true";
+            HasLogFileDump = ConfigManager.GetTFConfigParamAsBool("DumpLogsToFile");
             if (HasLogFileDump)
             {
-                 HasErrorLogFileDump = ConfigManager.GetTFConfigParam("ErrorsLogActive") == "true";
+                 HasErrorLogFileDump = ConfigManager.GetTFConfigParamAsBool("ErrorsLogActive");
             }
         }
 
@@ -254,7 +254,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (LogPath != null && LogPath != "") return;
 
-            if ((LogPath = ConfigManager.GetTFConfigParam("LogPath")!) == null)
+            if ((LogPath = ConfigManager.GetTFConfigParamAsString("LogPath")!) == null)
             {
                 LogError("Could not find the 'LogPath' config param. The log can not be opened, aborting execution");
                 Environment.Exit(-1);
@@ -269,7 +269,7 @@ namespace TestFramework.Code.FrameworkModules
 
             if (ThisExecutionHasErrorLogFileDump())
             {
-                if ((ErrorsLogPath = ConfigManager.GetTFConfigParam("ErrorsLogPath")!) == null)
+                if ((ErrorsLogPath = ConfigManager.GetTFConfigParamAsString("ErrorsLogPath")!) == null)
                 {
                     LogError("Could not find the 'ErrorsLogPath' config param, but the 'ErrorsLogActive' config param is set to 'true'. The errors log can not be opened, aborting execution");
                     Environment.Exit(-1);
@@ -393,7 +393,7 @@ namespace TestFramework.Code.FrameworkModules
         private static void StartFlushLoop()
         {
             string logsFlushPeriod;
-            if ((logsFlushPeriod = ConfigManager.GetTFConfigParam("LogsFlushPeriod")!) == null)
+            if ((logsFlushPeriod = ConfigManager.GetTFConfigParamAsString("LogsFlushPeriod")!) == null)
             {
                 LogError("Could not find the 'LogsFlushPeriod' config param. The logs can not be opened, aborting execution");
                 Environment.Exit(-1);

@@ -6,8 +6,10 @@ namespace TestFramework.Code.FrameworkModules
     public sealed class TestManager
     {
         public FrameworkTest? CurrentTest { get; set; }
-        
+
+        private static bool IndentReportSystemJsonFiles;
         private static string? OutputRootPath;
+        private static string? TestsNamespace;
         private CancellationTokenSource? TestCancellationTokenSource;
         private Thread? CurrentTestThread;
 
@@ -16,6 +18,7 @@ namespace TestFramework.Code.FrameworkModules
         {
             LogManager.TestManager = this;
             OutputRootPath = "";
+            TestsNamespace = "";
         }
 
         public static TestManager Instance
@@ -29,8 +32,7 @@ namespace TestFramework.Code.FrameworkModules
 
         public async Task LaunchTest(string testClassName)
         {
-            ConfigManager.LoadTestFrameworkMainConfig();
-            LogManager.StartLogFile();
+            Init();
 
             Type? testClass = GetTestClass(testClassName);
             if (testClass == null) Environment.Exit(-1);
@@ -47,31 +49,57 @@ namespace TestFramework.Code.FrameworkModules
 
         public static string GetOutputRootPath()
         {
-            InitOutputRootPath();
-            return OutputRootPath;
-        }
+            if (OutputRootPath != null && OutputRootPath != "") return OutputRootPath;
 
-        private static void InitOutputRootPath()
-        {
-            if (OutputRootPath != null && OutputRootPath != "") return;
-
-            if ((OutputRootPath = ConfigManager.GetTFConfigParam("TestFrameworkOutputRootPath")!) == null)
+            if ((OutputRootPath = ConfigManager.GetTFConfigParamAsString("TestFrameworkOutputRootPath")!) == null)
             {
                 LogManager.LogFatalError("Could not find the 'TestFrameworkOutputRootPath' config param, the test can not continue, aborting");
                 Environment.Exit(-1);
             }
             
             if (!Path.IsPathRooted(OutputRootPath)) OutputRootPath = Path.Combine(Environment.CurrentDirectory, OutputRootPath);
+
+            return OutputRootPath;
+        }
+
+        public static string GetTestsNamespace()
+        {
+            if (TestsNamespace != null && TestsNamespace != "") return TestsNamespace;
+
+            if ((TestsNamespace = ConfigManager.GetTFConfigParamAsString("MainTestsNamespace")!) == null)
+            {
+                LogManager.LogFatalError("Could not find the 'MainTestsNamespace' config param, the test can not continue, aborting");
+                Environment.Exit(-1);
+            }
+
+            return TestsNamespace;
+        }
+
+        public static bool ShouldIndentReportSystemJsonFiles()
+        {
+            return IndentReportSystemJsonFiles;
+        }
+
+        private static void Init()
+        {
+            ConfigManager.LoadTestFrameworkMainConfig();
+            InitIndentReportSystemJsonFilesParam();
+            LogManager.StartLogFile();
+        }
+
+        private static void InitIndentReportSystemJsonFilesParam()
+        {
+            IndentReportSystemJsonFiles = ConfigManager.GetTFConfigParamAsBool("IndentReportSystemJsonFiles");
         }
 
         private static Type? GetTestClass(string testClassName)
         {
             if (testClassName == null)
             {
-                LogManager.LogFatalError($"The test class to be executed has not been specified.");
+                LogManager.LogFatalError($"The test class to be executed has not been specified");
                 return null;
             }
-            string fullTestClassName = "TestFramework.FrameworkTests." + testClassName;
+            string fullTestClassName = GetTestsNamespace() + "." + testClassName;
 
             Type? testClass = Type.GetType(fullTestClassName);
             if (testClass == null)

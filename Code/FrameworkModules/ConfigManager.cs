@@ -20,7 +20,7 @@ namespace TestFramework.Code.FrameworkModules
             LogManager.LogOK("TestFramework Main Config loaded");
         }
 
-        public static string? GetTFConfigParam(string paramID)
+        public static string? GetTFConfigParamAsString(string paramID)
         {
             if (ConfigParams.TryGetValue(paramID, out string? paramValue))
             {
@@ -30,6 +30,21 @@ namespace TestFramework.Code.FrameworkModules
             {
                 LogManager.LogError($"The configuration parameter with ID '{paramID}' could not be found");
                 return null;
+            }
+        }
+
+        public static bool GetTFConfigParamAsBool(string paramID)
+        {
+            if (ConfigParams.TryGetValue(paramID, out string? paramValue))
+            {
+                if (bool.TryParse(paramValue, out bool boolValue)) return boolValue;
+                LogManager.LogError($"Could not parse the configuration parameter '{paramID}' to bool, returning the default value: 'false'");
+                return false;
+            }
+            else
+            {
+                LogManager.LogError($"The configuration parameter with ID '{paramID}' could not be found");
+                return false;
             }
         }
 
