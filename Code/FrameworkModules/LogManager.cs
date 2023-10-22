@@ -333,7 +333,7 @@ namespace TestFramework.Code.FrameworkModules
 
         private static string GetFormatedElapsedTime()
         {
-            return "|" + TimeManager.GetAppElapsedTimeAsString() + "| ";
+            return "|" + TimeManager.GetAppElapsedSecondsAsString() + "| ";
         }
 
         private static void DeleteOldLogFiles()
@@ -457,8 +457,13 @@ namespace TestFramework.Code.FrameworkModules
                     break;
             }
 
-            if (printPrefix) logFile?.WriteLine("<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span><span class='test-log-prefix'>" + GetLogTestPrefix(true) + "</span> " + message + "</p>");
-            else logFile?.WriteLine("<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>" + message + "</p>");
+            logFile?.WriteLine(GetFinalLogLineString(message, logClassName, printPrefix));
+        }
+
+        internal static string GetFinalLogLineString(string message, string logClassName, bool printPrefix)
+        {
+            if (printPrefix) return "<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span><span class='test-log-prefix'>" + GetLogTestPrefix(true) + "</span> " + message + "</p>";
+            return "<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>" + message + "</p>";
         }
 
         private static void FlushLogFiles(object state)
