@@ -22,12 +22,12 @@ namespace TestFramework.Code
                 return this;
             }
 
-            protected virtual void OnTestStepStart()
+            public virtual void OnTestStepStart()
             {
                 LogManager.LogOK($"> The TestStep has started: '{ID}'");
             }
 
-            protected virtual void OnTestStepEnd()
+            public virtual void OnTestStepEnd()
             {
                 LogManager.LogOK($"> The TestStep has been completed: '{ID}'");
             }

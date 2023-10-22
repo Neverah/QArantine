@@ -14,7 +14,6 @@ namespace TestFramework.Code.FrameworkModules
         private static bool HasErrorLogFileDump;
         private static StreamWriter? LogFile;
         private static StreamWriter? ErrorsLogFile;
-        private static Timer? FlushTimer;
 
         public enum LogLevel
         {
@@ -168,7 +167,6 @@ namespace TestFramework.Code.FrameworkModules
                     LogsOpen = true;
                     DumpToLogFiles = true;
 
-                    StartFlushLoop();
                     StartLogCloseEvent();
                 }
             }
@@ -281,7 +279,7 @@ namespace TestFramework.Code.FrameworkModules
             for (int i = 0; i < stackTrace.FrameCount; i++)
             {
                 StackFrame? frame = stackTrace.GetFrame(i);
-                MethodBase? method = frame.GetMethod();
+                MethodBase? method = frame?.GetMethod();
                 WriteLog($"\t- {method?.DeclaringType}.{method?.Name}", LogLevel.Debug);
             }
             WriteLog("}", LogLevel.Debug);
@@ -296,7 +294,7 @@ namespace TestFramework.Code.FrameworkModules
             for (int i = 0; i < stackTrace.FrameCount; i++)
             {
                 StackFrame? frame = stackTrace.GetFrame(i);
-                MethodBase? method = frame.GetMethod();
+                MethodBase? method = frame?.GetMethod();
                 WriteLog($"\t- {method?.DeclaringType}.{method?.Name}", LogLevel.FatalError);
             }
             WriteLog("}", LogLevel.FatalError);
@@ -353,7 +351,7 @@ namespace TestFramework.Code.FrameworkModules
 
         private static void CreateGenericLogFile(string logPath, out StreamWriter outLogWriter)
         {
-            outLogWriter = new(logPath, append: true);
+            outLogWriter = new(logPath, append: true) { AutoFlush = ConfigManager.GetTFConfigParamAsBool("LogsAutoFlush") };
 
             string htmlHeader = @"
             <!DOCTYPE html>
@@ -381,17 +379,6 @@ namespace TestFramework.Code.FrameworkModules
             </head>
             <body>";
             outLogWriter.WriteLine(htmlHeader);
-        }
-
-        private static void StartFlushLoop()
-        {
-            string logsFlushPeriod;
-            if ((logsFlushPeriod = ConfigManager.GetTFConfigParamAsString("LogsFlushPeriod")!) == null)
-            {
-                LogError("Could not find the 'LogsFlushPeriod' config param. The logs can not be opened, aborting execution");
-                Environment.Exit(-1);
-            }
-            FlushTimer = new Timer(FlushLogFiles!, null, 0, int.Parse(logsFlushPeriod));
         }
 
         private static void StartLogCloseEvent()
@@ -458,17 +445,6 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (printPrefix) return "<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span><span class='test-log-prefix'>" + GetLogTestPrefix(true) + "</span> " + message + "</p>";
             return "<p class='" + logClassName + "'><span class='time-tag'>" + GetFormatedElapsedTime() + "</span>" + message + "</p>";
-        }
-
-        private static void FlushLogFiles(object state)
-        {
-            FlushLogFile(LogFile!);
-            if(ThisExecutionHasErrorLogFileDump()) FlushLogFile(ErrorsLogFile!);
-        }
-
-        private static void FlushLogFile(StreamWriter logFile)
-        {
-            logFile.Flush();
         }
     }
 }

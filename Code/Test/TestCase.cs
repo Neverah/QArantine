@@ -12,20 +12,20 @@ namespace TestFramework.Code
                 Failed
             }
 
-            private string _CurrentStep;
+            private TestStep _CurrentStep;
             private TestCaseState _State;
 
             public FrameworkTest ParentTest { get; }
             public string ID { get; }
-            public string CurrentStep{ get => _CurrentStep; }
+            public TestStep CurrentStep{ get => _CurrentStep; }
             public TestCaseState State { get => _State; }
             public HashSet<TestError> TestCaseErrors { get; }
 
             public TestCase(FrameworkTest parentTest, string ID)
             {
-                this.ParentTest = parentTest;
+                ParentTest = parentTest;
                 this.ID = ID;
-                _CurrentStep = ParentTest.TestCaseInitStepID;
+                _CurrentStep = new(this, ParentTest.TestCaseInitStepID);
                 _State = TestCaseState.Testing;
                 TestCaseErrors = new();
             }
@@ -34,10 +34,16 @@ namespace TestFramework.Code
             {
                 if (nextTestStepName != null && nextTestStepName != "")
                 {
-                    _CurrentStep = nextTestStepName;
+                    if (nextTestStepName != CurrentStep.ID)
+                    {
+                        _CurrentStep.OnTestStepEnd();
+                        _CurrentStep = new(this, nextTestStepName);
+                        _CurrentStep.OnTestStepStart();
+                    }
                 }
                 else
                 {
+                    _CurrentStep.OnTestStepEnd();
                     if (HasErrors()) _State = TestCaseState.Failed;
                     else _State = TestCaseState.Passed;
                 }

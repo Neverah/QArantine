@@ -4,7 +4,6 @@ namespace TestFramework.Code
     {
         using System.Text.Json;
         using TestFramework.Code.FrameworkModules;
-        using TestFlowChart = Dictionary<string, Func<(String, float)>>;
         public abstract class FrameworkTest
         {
             public enum TestState
@@ -22,10 +21,10 @@ namespace TestFramework.Code
             public TestCase? CurrentTestCase { get; set; }
             public string TestCaseInitStepID { get; set; }
             public string TestCaseEndStepID { get; set; }
+            protected readonly List<TestCase> TestCasesList;
 
             private CancellationToken TimeoutToken;
-            private readonly TestFlowChart FlowChart;
-            private readonly List<TestCase> TestCasesList;
+            private readonly Dictionary<string, Func<(String, float)>> FlowChart;
 
             public FrameworkTest()
             {
@@ -57,7 +56,7 @@ namespace TestFramework.Code
 
             public virtual TestError CreateTestError(string errorID)
             {
-                return new(Name, CurrentTestCase != null ? CurrentTestCase.ID : "UNKNOWN_TEST_CASE", CurrentTestCase != null ? CurrentTestCase.CurrentStep : "UNKNOWN_TEST_STEP", errorID);
+                return new(Name, CurrentTestCase != null ? CurrentTestCase.ID : "UNKNOWN_TEST_CASE", CurrentTestCase != null ? CurrentTestCase.CurrentStep.ID : "UNKNOWN_TEST_STEP", errorID);
             }
 
             public virtual void ReportTestError(TestError newError)
@@ -85,64 +84,7 @@ namespace TestFramework.Code
                 return countResult;
             }
 
-            protected virtual TestFlowChart CreateFlowChart()
-            {
-                return new TestFlowChart
-                {
-                    { "Init", () => 
-                        {
-                            LogManager.LogTestOK($"Starting the current TestCase: '{CurrentTestCase}'");
-                            return ("Introduction", 0f);
-                        } 
-                    },
-
-                    { "Introduction", () => 
-                        {
-                            LogManager.LogTestOK($"This is the first TestStep of the current TestCase");
-                            LogManager.LogTestOK($"You should try implementing your own test by creating a flowchart that meets your needs");
-                            return ("ErrorReportExample", 0f);
-                        } 
-                    },
-
-                    { "ErrorReportExample", () => 
-                        {
-                            LogManager.LogTestOK($"This is the second step of the current TestCase");
-                            LogManager.LogTestOK($"An example of a simple error report (without additional fields):");
-                            ReportTestError(CreateTestError("EXAMPLE_OF_SIMPLE_ERROR"));
-                            LogManager.LogTestOK($"An example of an extended error report (with additional fields):");
-                            ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR")
-                                .AddExtraField("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
-                                .AddExtraField("1 + 1", 1 + 1)
-                                .AddExtraField("Value Of PI", Math.PI)
-                                .AddExtraField("Roses are", "Blue")
-                            );
-                            LogManager.LogTestOK($"Two errors in the same TestCase with all their fields being the same (excluding the TestStep) are considered equal, and duplicates are discarded");
-                            ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR")
-                                .AddExtraField("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
-                                .AddExtraField("1 + 1", 1 + 1)
-                                .AddExtraField("Value Of PI", Math.PI)
-                                .AddExtraField("Roses are", "Blue")
-                            );
-                            return ("WaitExample", 0f);
-                        } 
-                    },
-
-                    { "WaitExample", () => 
-                        {
-                            LogManager.LogTestOK($"This is the third step of the current TestCase");
-                            LogManager.LogTestOK($"A 2-second delay will be executed");
-                            return ("End", 2f);
-                        } 
-                    },
-
-                    { "End", () => 
-                        {
-                            LogManager.LogTestOK($"The TestCase has been completed: '{CurrentTestCase}'");
-                            return ("", 0f);
-                        } 
-                    },
-                };
-            }
+            protected abstract Dictionary<string, Func<(String, float)>> CreateFlowChart();
 
             protected virtual void LoadRequiredData()
             {
@@ -152,9 +94,6 @@ namespace TestFramework.Code
             protected virtual void CreateTestCasesList()
             {
                 LogManager.LogTestOK($"> Creating the list of TestCases for the test: '{Name}'");
-
-                TestCasesList.Add(new(this, "TestCaseExample1"));
-                TestCasesList.Add(new(this, "TestCaseExample2"));
             }
 
             protected virtual void RecoverStateFromPreviousExecution()
@@ -307,6 +246,7 @@ namespace TestFramework.Code
                 LogManager.LogTestOK($"> Testing of all TestCases in this test is about to begin: '{Name}'");
 
                 CurrentTestCase = GetNextTestCase();
+                CurrentTestCase?.CurrentStep.OnTestStepStart();
                 while (CurrentTestCase != null)
                 {
                     // If a timeout has been requested, the test will fail, stop, and an attempt will be made to perform a controlled shutdown
@@ -314,9 +254,9 @@ namespace TestFramework.Code
 
                     if (CurrentTestCase.State == TestCase.TestCaseState.Testing)
                     {
-                        string previousStep = CurrentTestCase.CurrentStep;
+                        string previousStepID = CurrentTestCase.CurrentStep.ID;
 
-                        (string nextStep, float delay) = FlowChart[previousStep]();
+                        (string nextStep, float delay) = FlowChart[previousStepID]();
                         CurrentTestCase.UpdateTestStep(nextStep);
 
                         if (delay >= 0) Thread.Sleep((int)delay * 1000);
