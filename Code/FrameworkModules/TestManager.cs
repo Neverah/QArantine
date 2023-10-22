@@ -7,7 +7,6 @@ namespace TestFramework.Code.FrameworkModules
     {
         public FrameworkTest? CurrentTest { get; set; }
 
-        private static bool IndentReportSystemJsonFiles;
         private static string? OutputRootPath;
         private static string? TestsNamespace;
         private CancellationTokenSource? TestCancellationTokenSource;
@@ -75,21 +74,9 @@ namespace TestFramework.Code.FrameworkModules
             return TestsNamespace;
         }
 
-        public static bool ShouldIndentReportSystemJsonFiles()
-        {
-            return IndentReportSystemJsonFiles;
-        }
-
         private static void Init()
         {
-            ConfigManager.LoadTestFrameworkMainConfig();
-            InitIndentReportSystemJsonFilesParam();
             LogManager.StartLogFile();
-        }
-
-        private static void InitIndentReportSystemJsonFilesParam()
-        {
-            IndentReportSystemJsonFiles = ConfigManager.GetTFConfigParamAsBool("IndentReportSystemJsonFiles");
         }
 
         private static Type? GetTestClass(string testClassName)

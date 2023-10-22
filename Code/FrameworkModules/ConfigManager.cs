@@ -9,15 +9,7 @@ namespace TestFramework.Code.FrameworkModules
         static ConfigManager()
         {
             ConfigParams = new();
-        }
-
-        public static void LoadTestFrameworkMainConfig()
-        {
-            if (IsMainConfigAlreadyLoaded) return;
-
-            ReadTestFrameworkMainConfigFile();
-            IsMainConfigAlreadyLoaded = true;
-            LogManager.LogOK("TestFramework Main Config loaded");
+            LoadTestFrameworkMainConfig();
         }
 
         public static string? GetTFConfigParamAsString(string paramID)
@@ -46,6 +38,15 @@ namespace TestFramework.Code.FrameworkModules
                 LogManager.LogError($"The configuration parameter with ID '{paramID}' could not be found");
                 return false;
             }
+        }
+
+        private static void LoadTestFrameworkMainConfig()
+        {
+            if (IsMainConfigAlreadyLoaded) return;
+
+            ReadTestFrameworkMainConfigFile();
+            IsMainConfigAlreadyLoaded = true;
+            LogManager.LogOK("TestFramework Main Config loaded");
         }
 
         private static void ReadTestFrameworkMainConfigFile()

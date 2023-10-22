@@ -258,7 +258,7 @@ namespace TestFramework.Code
 
                 using (StreamWriter errorsWriter = new(TestManager.GetOutputRootPath() + "/" + Name + "/TestResult.json"))
                 {
-                    errorsWriter.Write(JsonSerializer.Serialize(testResult, new JsonSerializerOptions { WriteIndented = TestManager.ShouldIndentReportSystemJsonFiles() }));
+                    errorsWriter.Write(JsonSerializer.Serialize(testResult, new JsonSerializerOptions { WriteIndented = ConfigManager.GetTFConfigParamAsBool("IndentReportSystemJsonFiles") }));
                 }
             }
 
@@ -274,7 +274,7 @@ namespace TestFramework.Code
 
                 using (StreamWriter errorsWriter = new(TestManager.GetOutputRootPath() + "/" + Name + "/Coverage/TestedTestCases.json"))
                 {
-                    errorsWriter.Write(JsonSerializer.Serialize(testedCasesList, new JsonSerializerOptions { WriteIndented = TestManager.ShouldIndentReportSystemJsonFiles() }));
+                    errorsWriter.Write(JsonSerializer.Serialize(testedCasesList, new JsonSerializerOptions { WriteIndented = ConfigManager.GetTFConfigParamAsBool("IndentReportSystemJsonFiles") }));
                 }
             }
 
@@ -290,7 +290,7 @@ namespace TestFramework.Code
 
                 using (StreamWriter errorsWriter = new(TestManager.GetOutputRootPath() + "/" + Name + "/TestFoundErrors.json"))
                 {
-                    errorsWriter.Write(JsonSerializer.Serialize(errorsList, new JsonSerializerOptions { WriteIndented = TestManager.ShouldIndentReportSystemJsonFiles() }));
+                    errorsWriter.Write(JsonSerializer.Serialize(errorsList, new JsonSerializerOptions { WriteIndented = ConfigManager.GetTFConfigParamAsBool("IndentReportSystemJsonFiles") }));
                 }
             }
 

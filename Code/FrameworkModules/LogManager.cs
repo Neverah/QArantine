@@ -5,6 +5,7 @@ namespace TestFramework.Code.FrameworkModules
 {
     public static class LogManager
     {
+        private static bool WriteOnConsole;
         private static string LogPath;
         private static string ErrorsLogPath;
         private static bool LogsOpen;
@@ -36,8 +37,10 @@ namespace TestFramework.Code.FrameworkModules
 
             LogsOpen = false;
             DumpToLogFiles = false;
-            HasLogFileDump = false;
-            HasErrorLogFileDump = false;
+
+            WriteOnConsole = ConfigManager.GetTFConfigParamAsBool("WriteLogsOnConsole");
+            HasLogFileDump = ConfigManager.GetTFConfigParamAsBool("DumpLogsToFile");
+            if (HasLogFileDump) HasErrorLogFileDump = ConfigManager.GetTFConfigParamAsBool("ErrorsLogActive");
         }
 
         public static void LogFatalError(string message)
@@ -157,7 +160,6 @@ namespace TestFramework.Code.FrameworkModules
         {
             if(!LogsOpen)
             {
-                InitActiveLogs();
                 if (ThisExecutionHasLogFileDump())
                 {
                     InitLogLevel();
@@ -241,15 +243,6 @@ namespace TestFramework.Code.FrameworkModules
             LogLvl = (LogLevel)Enum.Parse(typeof(LogLevel), logLvlName);
         }
 
-        private static void InitActiveLogs()
-        {
-            HasLogFileDump = ConfigManager.GetTFConfigParamAsBool("DumpLogsToFile");
-            if (HasLogFileDump)
-            {
-                 HasErrorLogFileDump = ConfigManager.GetTFConfigParamAsBool("ErrorsLogActive");
-            }
-        }
-
         private static void InitLogPath()
         {
             if (LogPath != null && LogPath != "") return;
@@ -312,13 +305,13 @@ namespace TestFramework.Code.FrameworkModules
         private static void PrintConsoleLogTimePrefix()
         {
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write(GetFormatedElapsedTime());
+            if(WriteOnConsole) Console.Write(GetFormatedElapsedTime());
         }
 
         private static void PrintConsoleLogTestPrefix()
         {
-            Console.ForegroundColor = ConsoleColor.DarkBlue;
-            Console.Write(GetLogTestPrefix());
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            if(WriteOnConsole) Console.Write(GetLogTestPrefix());
         }
 
         private static string GetLogTestPrefix(bool isForHTML = false)
@@ -409,7 +402,8 @@ namespace TestFramework.Code.FrameworkModules
 
         private static void WriteLog(string message, LogLevel lvl, bool printPrefixOnFile = false)
         {
-            Console.WriteLine(message);
+            if(WriteOnConsole) Console.WriteLine(message);
+            
             if (DumpToLogFiles && LogsOpen) 
             {
                 string[] lines = message.Split('\n');
