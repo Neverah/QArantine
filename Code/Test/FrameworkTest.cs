@@ -182,7 +182,7 @@ namespace TestFramework.Code
 
             protected virtual void PrintTestResultJSONFile()
             {
-                if (!ConfigManager.GetTFConfigParamAsBool("DumpTestResultJSONFile")) return;
+                if (!ConfigManager.GetTFConfigParamAsBool("DumpTestResultToJSONFile")) return;
 
                 Dictionary<string, object> testResult = new()
                 {
