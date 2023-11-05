@@ -158,6 +158,12 @@ namespace TestFramework.Code.FrameworkModules
             return HasErrorLogFileDump;
         }
 
+        private static void CloseLog()
+        {
+            CloseLogFiles();
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
         private static void CloseLogFiles()
         {
             DumpToLogFiles = false;
@@ -357,7 +363,7 @@ namespace TestFramework.Code.FrameworkModules
         private static void StartLogCloseEvent()
         {
             // Event handler for closing the log on program exit
-            AppDomain.CurrentDomain.ProcessExit += (sender, args) => CloseLogFiles();
+            AppDomain.CurrentDomain.ProcessExit += (sender, args) => CloseLog();
         }
 
         private static void WriteLog(string message, LogLevel logLvl, bool printPrefixOnFile = false)
