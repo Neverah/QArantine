@@ -25,6 +25,24 @@ namespace TestFramework.Code.FrameworkModules
             Debug
         }
 
+        private static readonly Dictionary<LogLevel, ConsoleColor> LogColorConsoleMap = new()
+        {
+            { LogLevel.FatalError, ConsoleColor.DarkRed },
+            { LogLevel.Error, ConsoleColor.Red },
+            { LogLevel.OK, ConsoleColor.Green },
+            { LogLevel.Warning, ConsoleColor.DarkYellow },
+            { LogLevel.Debug, ConsoleColor.White },
+        };
+
+        private static readonly Dictionary<LogLevel, string> LogClassHTMLFileMap = new()
+        {
+            { LogLevel.FatalError, "fatal-error" },
+            { LogLevel.Error, "error" },
+            { LogLevel.OK, "ok" },
+            { LogLevel.Warning, "warning" },
+            { LogLevel.Debug, "debug" },
+        };
+
         public static LogLevel LogLvl { get; set; }
         public static TestManager? TestManager { get; set; }
 
@@ -44,115 +62,56 @@ namespace TestFramework.Code.FrameworkModules
 
         public static void LogFatalError(string message)
         {
-            if (LogLvl >= LogLevel.FatalError)
-            {
-                PrintConsoleLogTimePrefix();
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                WriteLog($"{message}", LogLevel.FatalError);
-
-                PrintFatalErrorCallStack();
-            }
+            LogGeneric(message, LogLevel.FatalError);
+            if (LogLvl >= LogLevel.FatalError) PrintFatalErrorCallStack();
         }
 
         public static void LogError(string message)
         {
-            if (LogLvl >= LogLevel.Error)
-            {
-                PrintConsoleLogTimePrefix();
-                Console.ForegroundColor = ConsoleColor.Red;
-                WriteLog($"{message}", LogLevel.Error);
-            }
-
+            LogGeneric(message, LogLevel.Error);
             if (LogLvl >= LogLevel.Debug) PrintCallStack();
         }
 
         public static void LogOK(string message)
         {
-            if (LogLvl >= LogLevel.OK)
-            {
-                PrintConsoleLogTimePrefix();
-                Console.ForegroundColor = ConsoleColor.Green;
-                WriteLog($"{message}", LogLevel.OK);
-            }
+            LogGeneric(message, LogLevel.OK);
         }
 
         public static void LogWarning(string message)
         {
-            if (LogLvl >= LogLevel.Warning)
-            {
-                PrintConsoleLogTimePrefix();
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                WriteLog($"{message}", LogLevel.Warning);
-            }
+            LogGeneric(message, LogLevel.Warning);
         }
 
         public static void LogDebug(string message)
         {
-            if (LogLvl >= LogLevel.Debug)
-            {
-                PrintConsoleLogTimePrefix();
-                Console.ForegroundColor = ConsoleColor.White;
-                WriteLog($"{message}", LogLevel.Debug);
-            }
+            LogGeneric(message, LogLevel.Debug);
         }
 
         public static void LogTestFatalError(string message)
         {
-            if (LogLvl >= LogLevel.FatalError)
-            {
-                PrintConsoleLogTimePrefix();
-                PrintConsoleLogTestPrefix();
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                WriteLog($"{message}", LogLevel.FatalError, true);
-
-                PrintFatalErrorCallStack();
-            }
+            LogGeneric(message, LogLevel.FatalError, true);
+            if (LogLvl >= LogLevel.FatalError) PrintFatalErrorCallStack();
         }
 
         public static void LogTestError(string message)
         {
-            if (LogLvl >= LogLevel.Error)
-            {
-                PrintConsoleLogTimePrefix();
-                PrintConsoleLogTestPrefix();
-                Console.ForegroundColor = ConsoleColor.Red;
-                WriteLog($"{message}", LogLevel.Error, true);
-            }
-
+            LogGeneric(message, LogLevel.Error, true);
             if (LogLvl >= LogLevel.Debug) PrintCallStack();
         }
 
         public static void LogTestOK(string message)
         {
-            if (LogLvl >= LogLevel.OK)
-            {
-                PrintConsoleLogTimePrefix();
-                PrintConsoleLogTestPrefix();
-                Console.ForegroundColor = ConsoleColor.Green;
-                WriteLog($"{message}", LogLevel.OK, true);
-            }
+            LogGeneric(message, LogLevel.OK, true);
         }
 
         public static void LogTestWarning(string message)
         {
-            if (LogLvl >= LogLevel.Warning)
-            {
-                PrintConsoleLogTimePrefix();
-                PrintConsoleLogTestPrefix();
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                WriteLog($"{message}", LogLevel.Warning, true);
-            }
+            LogGeneric(message, LogLevel.Warning, true);
         }
 
         public static void LogTestDebug(string message)
         {
-            if (LogLvl >= LogLevel.Debug)
-            {
-                PrintConsoleLogTimePrefix();
-                PrintConsoleLogTestPrefix();
-                Console.ForegroundColor = ConsoleColor.White;
-                WriteLog($"{message}", LogLevel.Debug, true);
-            }
+            LogGeneric(message, LogLevel.Debug, true);
         }
 
         public static void StartLogFile()
@@ -267,6 +226,20 @@ namespace TestFramework.Code.FrameworkModules
                 }
                 
                 if (!Path.IsPathRooted(ErrorsLogPath)) ErrorsLogPath = Path.Combine(Environment.CurrentDirectory, ErrorsLogPath);
+            }
+        }
+
+        private static void LogGeneric(string message, LogLevel logLvl, bool isTestLog = false)
+        {
+            if (LogLvl >= logLvl)
+            {
+                string[] lines = message.Split('\n');
+                foreach (string line in lines)
+                {
+                    PrintConsoleLogTimePrefix();
+                    if (isTestLog) PrintConsoleLogTestPrefix();
+                    WriteLog(line, logLvl, isTestLog);
+                }
             }
         }
 
@@ -387,14 +360,17 @@ namespace TestFramework.Code.FrameworkModules
             AppDomain.CurrentDomain.ProcessExit += (sender, args) => CloseLogFiles();
         }
 
-        private static void WriteLog(string message, LogLevel lvl, bool printPrefixOnFile = false)
+        private static void WriteLog(string message, LogLevel logLvl, bool printPrefixOnFile = false)
         {
-            if(WriteOnConsole) Console.WriteLine(message);
+            if(WriteOnConsole)
+            {
+                Console.ForegroundColor = LogColorConsoleMap[logLvl];
+                Console.WriteLine(message);
+            }
             
             if (DumpToLogFiles && LogsOpen) 
             {
-                string[] lines = message.Split('\n');
-                foreach (string line in lines) WriteLogOnLogFiles(line, lvl, printPrefixOnFile);
+                WriteLogOnLogFiles(message, logLvl, printPrefixOnFile);
             }
         }
 
@@ -406,36 +382,13 @@ namespace TestFramework.Code.FrameworkModules
 
         private static void WriteLogOnLogFile(StreamWriter logFile, string message, LogLevel lvl, bool printPrefix)
         {
-            string logClassName;
-
             message = message.Replace("<", "&lt;").Replace(">", "&gt;");
 
-            switch (lvl)
+            string logClassName;
+            if (!LogClassHTMLFileMap.TryGetValue(lvl, out logClassName!))
             {
-                case LogLevel.FatalError:
-                    logClassName = "fatal-error";
-                    break;
-
-                case LogLevel.Error:
-                    logClassName = "error";
-                    break;
-
-                case LogLevel.OK:
-                    logClassName = "ok";
-                    break;
-
-                case LogLevel.Warning:
-                    logClassName = "warning";
-                    break;
-
-                case LogLevel.Debug:
-                    logClassName = "debug";
-                    break;
-
-                default:
-                    logClassName = "error";
-                    message = "[ERROR: THIS LOG HAS NO DEFINED TYPE] - " + message;
-                    break;
+                logClassName = "error";
+                message = "[ERROR: THIS LOG HAS NO DEFINED TYPE] - " + message;
             }
 
             logFile?.WriteLine(GetFinalLogLineString(message, logClassName, printPrefix));

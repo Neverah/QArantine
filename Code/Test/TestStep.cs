@@ -24,12 +24,17 @@ namespace TestFramework.Code
 
             public virtual void OnTestStepStart()
             {
-                LogManager.LogOK($"> The TestStep has started: '{ID}'");
+                LogManager.LogTestOK($"> The TestStep has started: '{ID}'");
             }
 
             public virtual void OnTestStepEnd()
             {
-                LogManager.LogOK($"> The TestStep has been completed: '{ID}'");
+                LogManager.LogTestOK($"> The TestStep has been completed: '{ID}'");
+            }
+
+            public override string ToString()
+            {
+                return ID;
             }
         }
     }
