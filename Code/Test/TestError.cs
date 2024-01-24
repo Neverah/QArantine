@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 using TestFramework.Code.FrameworkUtils;
 
 namespace TestFramework.Code

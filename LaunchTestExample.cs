@@ -1,4 +1,8 @@
-﻿using TestFramework.Code.FrameworkModules;
+﻿using System;
+using System.Threading.Tasks;
+
+using TestFramework.Code.FrameworkModules;
+
 class LaunchTestExample
 {
     static async Task Main(string[] args)

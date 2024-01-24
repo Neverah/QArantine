@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace TestFramework.Code.FrameworkUtils
 {
     public static class CollectionUtils
