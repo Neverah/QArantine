@@ -1,5 +1,5 @@
 ﻿using TestFramework.Code.FrameworkModules;
-class Program
+class LaunchTestExample
 {
     static async Task Main(string[] args)
     {
