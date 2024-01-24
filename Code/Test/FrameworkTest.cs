@@ -18,7 +18,7 @@ namespace TestFramework.Code
             public TestState State { get; set; }
             public string Name { get; }
             public DateTime TestStartTime { get; }
-            public TestCase? CurrentTestCase { get; set; }
+            public TestCase CurrentTestCase { get; set; }
             public string TestCaseInitStepID { get; set; }
             public string TestCaseEndStepID { get; set; }
             protected readonly List<TestCase> TestCasesList;
@@ -40,6 +40,7 @@ namespace TestFramework.Code
 
                 FlowChart = CreateFlowChart();
                 TestCasesList = new();
+                CurrentTestCase = new(this, "NO_TEST_CASE");
             }
 
             public virtual void Launch(CancellationToken timeoutToken)
@@ -54,9 +55,14 @@ namespace TestFramework.Code
                 ExecutionLoop();
             }
 
-            public virtual TestError CreateTestError(string errorID)
+            public virtual TestError CreateTestError(string errorID, string errorCategory)
             {
-                return new(Name, CurrentTestCase != null ? CurrentTestCase.ID : "UNKNOWN_TEST_CASE", CurrentTestCase != null ? CurrentTestCase.CurrentStep.ID : "UNKNOWN_TEST_STEP", errorID);
+                return new(Name, CurrentTestCase != null ? CurrentTestCase.ID : "UNKNOWN_TEST_CASE", CurrentTestCase != null ? CurrentTestCase.CurrentStep.ID : "UNKNOWN_TEST_STEP", errorID, errorCategory);
+            }
+
+            public virtual TestError CreateTestError(string errorID, string errorCategory, string errorDescription)
+            {
+                return new(Name, CurrentTestCase != null ? CurrentTestCase.ID : "UNKNOWN_TEST_CASE", CurrentTestCase != null ? CurrentTestCase.CurrentStep.ID : "UNKNOWN_TEST_STEP", errorID, errorCategory, errorDescription);
             }
 
             public virtual void ReportTestError(TestError newError)
@@ -245,7 +251,7 @@ namespace TestFramework.Code
             {
                 LogManager.LogTestOK($"> Testing of all TestCases in this test is about to begin: '{Name}'");
 
-                CurrentTestCase = GetNextTestCase();
+                CurrentTestCase = GetNextTestCase()!;
                 CurrentTestCase?.CurrentStep.OnTestStepStart();
                 while (CurrentTestCase != null)
                 {
@@ -263,7 +269,7 @@ namespace TestFramework.Code
                     }
                     else
                     {
-                        CurrentTestCase = GetNextTestCase();
+                        CurrentTestCase = GetNextTestCase()!;
                     }
                 }
                 // Cuando ya no queden casos de prueba, el test habrá terminado
@@ -287,7 +293,7 @@ namespace TestFramework.Code
                 if (TimeoutToken.IsCancellationRequested)
                 {
                     LogManager.LogTestError($"The test '{Name}' has reached the timeout, and its cancellation has been requested. An attempt will be made to perform a controlled shutdown");
-                    ReportTestError(CreateTestError("TEST_TIMEOUT")
+                    ReportTestError(CreateTestError("TEST_TIMEOUT", "TEST_ISSUE")
                         .AddExtraField("TestExecutionTime", TimeManager.GetAppElapsedSecondsAsString())
                     );
                 }

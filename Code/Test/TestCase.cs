@@ -14,6 +14,7 @@ namespace TestFramework.Code
 
             private TestStep _CurrentStep;
             private TestCaseState _State;
+            private Dictionary<string, object> TestCaseData { get; }
 
             public FrameworkTest ParentTest { get; }
             public string ID { get; }
@@ -27,6 +28,7 @@ namespace TestFramework.Code
                 this.ID = ID;
                 _CurrentStep = new(this, ParentTest.TestCaseInitStepID);
                 _State = TestCaseState.Testing;
+                TestCaseData = new();
                 TestCaseErrors = new();
             }
 
@@ -49,6 +51,31 @@ namespace TestFramework.Code
                 }
             }
 
+            public object? GetDataField(string dataFieldID)
+            {
+                TestCaseData.TryGetValue(dataFieldID, out object? foundValue);
+                return foundValue;
+            }
+
+            public bool TryGetDataField(string dataFieldID, out object value)
+            {
+                if(TestCaseData.TryGetValue(dataFieldID, out value!))
+                {
+                    return true;
+                }
+                else
+                {
+                    value = null!;
+                    return false;
+                }
+            }
+
+            public TestCase AddDataField(string dataFieldID, object dataFieldValue)
+            {
+                TestCaseData.Add(dataFieldID, dataFieldValue);
+                return this;
+            }
+
             public virtual bool HasErrors()
             {
                 return TestCaseErrors.Count > 0;
@@ -58,7 +85,7 @@ namespace TestFramework.Code
             {
                 if (!TestCaseErrors.Add(testError))
                 {
-                    LogManager.LogTestWarning($"The error with ErrorType '{testError.ErrorID}' is duplicated, it hasn't been inserted.");
+                    LogManager.LogTestWarning($"The last reported error with ErrorType '{testError.ErrorID}' is duplicated, it hasn't been stored.");
                 }
             }
 

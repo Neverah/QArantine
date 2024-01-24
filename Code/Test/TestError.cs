@@ -6,19 +6,54 @@ namespace TestFramework.Code
     {
         public class TestError
         {
+            private Dictionary<string, object> ExtraFields { get; }
+
             public string TestName { get; }
             public string TestCaseName { get; }
             public string TestStepName { get; }
             public string ErrorID { get; }
-            public Dictionary<string, object> ExtraFields { get; }
+            public string ErrorCategory { get; }
+            public string ErrorDescription { get; }
 
-            public TestError(string testName, string testCaseName, string testStepName, string errorID)
+            public TestError(string testName, string testCaseName, string testStepName, string errorID, string errorCategory)
             {
                 TestName = testName;
                 TestCaseName = testCaseName;
                 TestStepName = testStepName;
                 ErrorID = errorID;
+                ErrorCategory = errorCategory;
+                ErrorDescription = "No description provided";
                 ExtraFields = new();
+            }
+
+            public TestError(string testName, string testCaseName, string testStepName, string errorID, string errorCategory, string errorDescription)
+            {
+                TestName = testName;
+                TestCaseName = testCaseName;
+                TestStepName = testStepName;
+                ErrorID = errorID;
+                ErrorCategory = errorCategory;
+                ErrorDescription = errorDescription;
+                ExtraFields = new();
+            }
+
+            public object? GetExtraField(string extraFieldID)
+            {
+                ExtraFields.TryGetValue(extraFieldID, out object? foundValue);
+                return foundValue;
+            }
+
+            public bool TryGetExtraField(string extraFieldID, out object value)
+            {
+                if(ExtraFields.TryGetValue(extraFieldID, out value!))
+                {
+                    return true;
+                }
+                else
+                {
+                    value = null!;
+                    return false;
+                }
             }
 
             public TestError AddExtraField(string extraFieldID, object extraFieldValue)

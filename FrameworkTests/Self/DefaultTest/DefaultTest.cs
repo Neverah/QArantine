@@ -29,16 +29,16 @@ namespace TestFramework.FrameworkTests
                     {
                         LogManager.LogTestOK($"This is the second step of the current TestCase");
                         LogManager.LogTestOK($"An example of a simple error report (without additional fields):");
-                        ReportTestError(CreateTestError("EXAMPLE_OF_SIMPLE_ERROR"));
+                        ReportTestError(CreateTestError("EXAMPLE_OF_SIMPLE_ERROR", "TEST_ISSUE", "Example of a simple error report (without additional fields)"));
                         LogManager.LogTestOK($"An example of an extended error report (with additional fields):");
-                        ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR")
+                        ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR", "TEST_ISSUE", "Example of an extended error report (with additional fields)")
                             .AddExtraField("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
                             .AddExtraField("1 + 1", 1 + 1)
                             .AddExtraField("Value Of PI", Math.PI)
                             .AddExtraField("Roses are", "Blue")
                         );
                         LogManager.LogTestOK($"Two errors in the same TestCase with all their fields being the same (excluding the TestStep) are considered equal, and duplicates are discarded");
-                        ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR")
+                        ReportTestError(CreateTestError("EXAMPLE_OF_EXTENDED_ERROR", "TEST_ISSUE", "Example of an extended error report (with additional fields)")
                             .AddExtraField("Today Date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
                             .AddExtraField("1 + 1", 1 + 1)
                             .AddExtraField("Value Of PI", Math.PI)
