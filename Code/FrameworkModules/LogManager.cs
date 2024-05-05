@@ -61,6 +61,8 @@ namespace TestFramework.Code.FrameworkModules
             WriteOnConsole = ConfigManager.GetTFConfigParamAsBool("WriteLogsOnConsole");
             HasLogFileDump = ConfigManager.GetTFConfigParamAsBool("DumpLogsToFile");
             if (HasLogFileDump) HasErrorLogFileDump = ConfigManager.GetTFConfigParamAsBool("ErrorsLogActive");
+
+            StartLogFile();
         }
 
         public static void LogFatalError(string message)

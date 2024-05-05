@@ -81,7 +81,7 @@ namespace TestFramework.Code.FrameworkModules
 
         private static void Init()
         {
-            LogManager.StartLogFile();
+
         }
 
         private static Type? GetTestClass(string testClassName)
