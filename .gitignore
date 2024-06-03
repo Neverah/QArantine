@@ -3,6 +3,7 @@ bin/
 obj/
 
 # Framework output
-*/TestFramework/TestsOutput/*
+**/TestsOutput/**
+**\TestsOutput\**
 *Log.html
 LaunchTestExample.cs
