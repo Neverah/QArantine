@@ -1,8 +1,8 @@
-# Compilation
-/bin/
-/obj/
+# Ignorar carpetas bin y obj generadas por el compilador
+bin/
+obj/
 
 # Framework output
-/TestsOutput/*
+*/TestFramework/TestsOutput/*
 *Log.html
 LaunchTestExample.cs

@@ -16,7 +16,7 @@ namespace TestFramework.Code
 
             private TestStep _CurrentStep;
             private TestCaseState _State;
-            private Dictionary<string, object> TestCaseData { get; }
+            public Dictionary<string, object> TestCaseData { get; } // public so it can be serialized
 
             public FrameworkTest ParentTest { get; }
             public string ID { get; }
@@ -28,7 +28,7 @@ namespace TestFramework.Code
             {
                 ParentTest = parentTest;
                 this.ID = ID;
-                _CurrentStep = new(this, ParentTest.TestCaseInitStepID);
+                _CurrentStep = new(this, ParentTest.TestCaseInitStepID, 1);
                 _State = TestCaseState.Testing;
                 TestCaseData = new();
                 TestCaseErrors = new();
@@ -41,7 +41,7 @@ namespace TestFramework.Code
                     if (nextTestStepName != CurrentStep.ID)
                     {
                         _CurrentStep.OnTestStepEnd();
-                        _CurrentStep = new(this, nextTestStepName);
+                        _CurrentStep = new(this, nextTestStepName, _CurrentStep.stepNum + 1);
                         _CurrentStep.OnTestStepStart();
                     }
                 }
@@ -87,7 +87,7 @@ namespace TestFramework.Code
             {
                 if (!TestCaseErrors.Add(testError))
                 {
-                    LogManager.LogTestWarning($"The last reported error with ErrorType '{testError.ErrorID}' is duplicated, it hasn't been stored.");
+                    LogTestWarning($"The last reported error with ErrorType '{testError.ErrorID}' is duplicated, it hasn't been stored.");
                 }
             }
 
@@ -95,7 +95,7 @@ namespace TestFramework.Code
             {
                 foreach(TestError testError in TestCaseErrors)
                 {
-                    LogManager.LogError("- " + testError.ToString());
+                    LogError("- " + testError.ToString());
                 }
             }
 
@@ -106,12 +106,12 @@ namespace TestFramework.Code
 
             protected virtual void OnTestCaseStart()
             {
-                LogManager.LogOK($"> The TestCase has started: '{this.ID}'");
+                LogOK($"> The TestCase has started: '{this.ID}'");
             }
 
             protected virtual void OnTestCaseEnd()
             {
-                LogManager.LogOK($"> The TestCase has been completed: '{this.ID}'");
+                LogOK($"> The TestCase has been completed: '{this.ID}'");
             }
         }
     }

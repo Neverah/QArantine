@@ -56,6 +56,7 @@ namespace TestFramework.Code
                 CreateTestCasesList();
                 RecoverStateFromPreviousExecution();
                 SetTestPreconditions();
+                PreLaunchChecks();
                 OnTestStart();
                 ExecutionLoop();
             }
@@ -72,7 +73,7 @@ namespace TestFramework.Code
 
             public virtual void ReportTestError(TestError newError)
             {
-                LogManager.LogTestError($"TEST ERROR DETECTED > {newError}");
+                LogTestError($"TEST ERROR DETECTED > {newError}");
                 CurrentTestCase?.AddError(newError);
             }
 
@@ -99,29 +100,37 @@ namespace TestFramework.Code
 
             protected virtual void LoadRequiredData()
             {
-                LogManager.LogTestOK($"> Loading the data for the test: '{Name}'");
+                LogTestOK($"> Loading the data for the test: '{Name}'");
             }
 
             protected virtual void CreateTestCasesList()
             {
-                LogManager.LogTestOK($"> Creating the list of TestCases for the test: '{Name}'");
+                LogTestOK($"> Creating the list of TestCases for the test: '{Name}'");
             }
 
             protected virtual void RecoverStateFromPreviousExecution()
             {
-                LogManager.LogTestOK($"> Retrieving the state after a possible previous execution: '{Name}'");
+                LogTestOK($"> Retrieving the state after a possible previous execution: '{Name}'");
                 DeleteOldTestExecutionOutputFiles();
                 CreateTestOutputDirectories();
             }
 
             protected virtual void SetTestPreconditions()
             {
-                LogManager.LogTestOK($"> Setting the test's preconditions: '{Name}'");
+                LogTestOK($"> Setting the test's preconditions: '{Name}'");
+            }
+
+            protected virtual void PreLaunchChecks()
+            {
+                LogTestOK($"> Checking everything is ready for starting the test: '{Name}'");
             }
 
             protected virtual void OnTestStart()
             {
-                LogManager.LogTestOK($"> Starting the test: '{Name}'");
+                LogTestOK($"> Starting the test: '{Name}'");
+
+                if(ConfigManager.GetTFConfigParamAsBool("RecordTestExecutionVideo"))
+                    RecordingManager.Instance.StartRecordingWindow(TestManager.Instance.GetOutputRootPath() + "/" + Name + "/Video/" + Name + "Exec.mp4", ConfigManager.GetTFConfigParamAsString("WindowToRecordName")!);
             }
 
             protected virtual void OnTestEnd()
@@ -129,15 +138,18 @@ namespace TestFramework.Code
                 if (HasErrors()) State = TestState.Failed;
                 else State = TestState.Passed;
 
-                LogManager.LogTestOK($"> The test has finished: '{Name}'");
+                LogTestOK($"> The test has finished: '{Name}'");
 
                 LogReportOnEnd();
                 PrintTestResultJSONFile();
                 PrintCoverageToJSONFile();
                 PrintErrorsToJSONFile();
 
+                if(ConfigManager.GetTFConfigParamAsBool("RecordTestExecutionVideo"))
+                    RecordingManager.Instance.StopRecording();
+
                 // El log se copiará a la carpeta de Output del test al cerrar el programa, si hay log
-                if (LogManager.ThisExecutionHasLogFileDump()) AppDomain.CurrentDomain.ProcessExit += (sender, args) => CopyLogsToTestOutputFile();
+                if (LogManager.fileLogHandler.ThisExecutionHasLogFileDump()) AppDomain.CurrentDomain.ProcessExit += (sender, args) => CopyLogsToTestOutputFile();
             }
 
             protected virtual void LogReportOnEnd()
@@ -148,46 +160,47 @@ namespace TestFramework.Code
 
             protected virtual void LogCoverageOnEnd()
             {
-                LogManager.LogOK("\n>> Test coverage section:\n");
-                LogManager.LogOK("> TestCases:");
+                LogOK("\n>> Test coverage section:\n");
+                LogOK("> TestCases:");
                 foreach(TestCase testCase in TestCasesList)
                 {
-                    LogManager.LogOK("- " + testCase.ID);
+                    LogOK("- " + testCase.ID);
                 }
             }
 
             protected virtual void LogErrorsOnEnd()
             {
-                LogManager.LogOK("\n>> Test errors section:\n");
+                LogOK("\n>> Test errors section:\n");
                 foreach(TestCase testCase in TestCasesList)
                 {
                     if (testCase.HasErrors())
                     {
-                        LogManager.LogOK("> " + testCase.ID + ":");
+                        LogOK("> " + testCase.ID + ":");
                         testCase.LogFoundErrors();
-                        LogManager.LogOK("");
+                        LogOK("");
                     }
                 }
             }
 
             protected virtual void DeleteOldTestExecutionOutputFiles()
             {
-                string outputDirPath = TestManager.GetOutputRootPath() + "/" + Name;
+                string outputDirPath = TestManager.Instance.GetOutputRootPath() + "/" + Name;
                 if (Directory.Exists(outputDirPath))
                 {
-                    LogManager.LogTestOK($"> Deleting the /Output directory from a previous test run: '{Name}'");
+                    LogTestOK($"> Deleting the /Output directory from a previous test run: '{Name}'");
                     Directory.Delete(outputDirPath, true);
                 }
             }
 
             protected virtual void CreateTestOutputDirectories()
             {
-                LogManager.LogTestOK($"> Creating the necessary directories for the test: '{Name}'");
+                LogTestOK($"> Creating the necessary directories for the test: '{Name}'");
 
-                string outputRootPath = TestManager.GetOutputRootPath();
+                string outputRootPath = TestManager.Instance.GetOutputRootPath();
 
                 Directory.CreateDirectory(outputRootPath);
                 Directory.CreateDirectory(outputRootPath + "/" + Name);
+                Directory.CreateDirectory(outputRootPath + "/" + Name + "/Video");
                 Directory.CreateDirectory(outputRootPath + "/" + Name + "/Coverage");
             }
 
@@ -206,7 +219,7 @@ namespace TestFramework.Code
                     { "EndTimestamp", DateTime.Now.ToUniversalTime().ToString("o") },
                 };
 
-                using (StreamWriter errorsWriter = new(TestManager.GetOutputRootPath() + "/" + Name + "/TestResult.json"))
+                using (StreamWriter errorsWriter = new(TestManager.Instance.GetOutputRootPath() + "/" + Name + "/TestResult.json"))
                 {
                     errorsWriter.Write(JsonSerializer.Serialize(testResult, new JsonSerializerOptions { WriteIndented = ConfigManager.GetTFConfigParamAsBool("IndentReportSystemJsonFiles") }));
                 }
@@ -222,7 +235,7 @@ namespace TestFramework.Code
                     testedCasesList.Add(testCase.ID);
                 }
 
-                using (StreamWriter errorsWriter = new(TestManager.GetOutputRootPath() + "/" + Name + "/Coverage/TestedTestCases.json"))
+                using (StreamWriter errorsWriter = new(TestManager.Instance.GetOutputRootPath() + "/" + Name + "/Coverage/TestedTestCases.json"))
                 {
                     errorsWriter.Write(JsonSerializer.Serialize(testedCasesList, new JsonSerializerOptions { WriteIndented = ConfigManager.GetTFConfigParamAsBool("IndentReportSystemJsonFiles") }));
                 }
@@ -238,7 +251,7 @@ namespace TestFramework.Code
                     errorsList.AddRange(testCase.TestCaseErrors);
                 }
 
-                using (StreamWriter errorsWriter = new(TestManager.GetOutputRootPath() + "/" + Name + "/TestFoundErrors.json"))
+                using (StreamWriter errorsWriter = new(TestManager.Instance.GetOutputRootPath() + "/" + Name + "/TestFoundErrors.json"))
                 {
                     errorsWriter.Write(JsonSerializer.Serialize(errorsList, new JsonSerializerOptions { WriteIndented = ConfigManager.GetTFConfigParamAsBool("IndentReportSystemJsonFiles") }));
                 }
@@ -247,14 +260,14 @@ namespace TestFramework.Code
             protected virtual void CopyLogsToTestOutputFile()
             {
                 Thread.Sleep(500);
-                if (File.Exists(LogManager.GetLogPath())) File.Copy(LogManager.GetLogPath(), TestManager.GetOutputRootPath() + "/" + Name + "/Log.html");
-                if (LogManager.ThisExecutionHasErrorLogFileDump() && File.Exists(LogManager.GetErrorsLogPath())) File.Copy(LogManager.GetErrorsLogPath(), TestManager.GetOutputRootPath() + "/" + Name + "/ErrorsLog.html");
+                if (File.Exists(LogManager.fileLogHandler.GetLogPath())) File.Copy(LogManager.fileLogHandler.GetLogPath(), TestManager.Instance.GetOutputRootPath() + "/" + Name + "/Log.html");
+                if (LogManager.fileLogHandler.ThisExecutionHasErrorLogFileDump() && File.Exists(LogManager.fileLogHandler.GetErrorsLogPath())) File.Copy(LogManager.fileLogHandler.GetErrorsLogPath(), TestManager.Instance.GetOutputRootPath() + "/" + Name + "/ErrorsLog.html");
             }
 
 
             private void ExecutionLoop()
             {
-                LogManager.LogTestOK($"> Testing of all TestCases in this test is about to begin: '{Name}'");
+                LogTestOK($"> Testing of all TestCases in this test is about to begin: '{Name}'");
 
                 CurrentTestCase = GetNextTestCase()!;
                 CurrentTestCase?.CurrentStep.OnTestStepStart();
@@ -297,7 +310,7 @@ namespace TestFramework.Code
             {
                 if (TimeoutToken.IsCancellationRequested)
                 {
-                    LogManager.LogTestError($"The test '{Name}' has reached the timeout, and its cancellation has been requested. An attempt will be made to perform a controlled shutdown");
+                    LogTestError($"The test '{Name}' has reached the timeout, and its cancellation has been requested. An attempt will be made to perform a controlled shutdown");
                     ReportTestError(CreateTestError("TEST_TIMEOUT", "TEST_ISSUE")
                         .AddExtraField("TestExecutionTime", TimeManager.GetAppElapsedSecondsAsString())
                     );

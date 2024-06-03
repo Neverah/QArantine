@@ -6,7 +6,8 @@ namespace TestFramework.Code.FrameworkModules
 {
     public static class ConfigManager
     {
-        public const string MAIN_CONFIG_FILE_PATH = "TestFramework.config";
+        public const string MAIN_CONFIG_FILE_PATH = "TestFramework/Config/TestFrameworkDefault.config";
+        public const string OVERWRITE_CONFIG_FILE_PATH = "TestFramework/Config/TestFrameworkOverwrite.config";
         private static readonly Dictionary<string, string> ConfigParams;
         private static bool IsMainConfigAlreadyLoaded = false;
 
@@ -24,7 +25,7 @@ namespace TestFramework.Code.FrameworkModules
             }
             else
             {
-                LogManager.LogError($"The configuration parameter with ID '{paramID}' could not be found");
+                LogError($"The configuration parameter with ID '{paramID}' could not be found");
                 return null;
             }
         }
@@ -34,12 +35,12 @@ namespace TestFramework.Code.FrameworkModules
             if (ConfigParams.TryGetValue(paramID, out string? paramValue))
             {
                 if (bool.TryParse(paramValue, out bool boolValue)) return boolValue;
-                LogManager.LogError($"Could not parse the configuration parameter '{paramID}' to bool, returning the default value: 'false'");
+                LogError($"Could not parse the configuration parameter '{paramID}' to bool, returning the default value: 'false'");
                 return false;
             }
             else
             {
-                LogManager.LogError($"The configuration parameter with ID '{paramID}' could not be found");
+                LogError($"The configuration parameter with ID '{paramID}' could not be found");
                 return false;
             }
         }
@@ -48,16 +49,20 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (IsMainConfigAlreadyLoaded) return;
 
-            ReadTestFrameworkMainConfigFile();
+            ReadTestFrameworkMainConfigFile(MAIN_CONFIG_FILE_PATH);
+
+            if (File.Exists(OVERWRITE_CONFIG_FILE_PATH))
+                ReadTestFrameworkMainConfigFile(OVERWRITE_CONFIG_FILE_PATH);
+            
             IsMainConfigAlreadyLoaded = true;
-            LogManager.LogOK("TestFramework Main Config loaded");
+            LogOK("TestFramework Main Config loaded");
         }
 
-        private static void ReadTestFrameworkMainConfigFile()
+        private static void ReadTestFrameworkMainConfigFile(string configFilePath)
         {
             try
             {
-                using StreamReader reader = new(MAIN_CONFIG_FILE_PATH);
+                using StreamReader reader = new(configFilePath);
                 string line;
                 while ((line = reader.ReadLine()!) != null)
                 {
@@ -89,7 +94,7 @@ namespace TestFramework.Code.FrameworkModules
             }
             catch (Exception ex)
             {
-                LogManager.LogError($"Error reading the file '{MAIN_CONFIG_FILE_PATH}': {ex.Message}");
+                LogError($"Error reading the file '{configFilePath}': {ex.Message}");
             }
         }
     }

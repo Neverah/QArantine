@@ -8,7 +8,7 @@ namespace TestFramework.Code
     {
         public class TestError
         {
-            private Dictionary<string, object> ExtraFields { get; }
+            public Dictionary<string, object> ExtraFields { get; }  // public so it can be serialized
 
             public string TestName { get; }
             public string TestCaseName { get; }

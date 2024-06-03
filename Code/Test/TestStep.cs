@@ -7,14 +7,16 @@ namespace TestFramework.Code
         using TestFramework.Code.FrameworkModules;
         public class TestStep
         {
-            public TestCase ParentTestCase { get; }
-            public string ID { get; }
-            public HashSet<(string, object)> StepFieldsList { get; }
+            public TestCase ParentTestCase { get; private set;}
+            public string ID { get; private set;}
+            public int stepNum { get; private set;}
+            public HashSet<(string, object)> StepFieldsList { get; } // public so it can be serialized
 
-            public TestStep(TestCase parentTestCase, string ID)
+            public TestStep(TestCase parentTestCase, string ID, int stepNum)
             {
                 ParentTestCase = parentTestCase;
                 this.ID = ID;
+                this.stepNum = stepNum;
                 StepFieldsList = new();
             }
 
@@ -26,17 +28,17 @@ namespace TestFramework.Code
 
             public virtual void OnTestStepStart()
             {
-                LogManager.LogTestOK($"> The TestStep has started: '{ID}'");
+                LogTestDebug($"> The TestStep has started: '{this.ToString()}'");
             }
 
             public virtual void OnTestStepEnd()
             {
-                LogManager.LogTestOK($"> The TestStep has been completed: '{ID}'");
+                LogTestDebug($"> The TestStep has been completed: '{this.ToString()}'");
             }
 
             public override string ToString()
             {
-                return ID;
+                return stepNum + "-" + ID;
             }
         }
     }

@@ -1,0 +1,48 @@
+[
+  {
+    "ExtraFields": {},
+    "TestName": "DefaultTest",
+    "TestCaseName": "TestCaseExample1",
+    "TestStepName": "ErrorReportExample",
+    "ErrorID": "EXAMPLE_OF_SIMPLE_ERROR",
+    "ErrorCategory": "DEBUG_EXPECTED_ERROR",
+    "ErrorDescription": "Example of a simple error report (without additional fields)"
+  },
+  {
+    "ExtraFields": {
+      "Today Date": "2024-06-03 19:04:54",
+      "1 \u002B 1": 2,
+      "Value Of PI": 3.141592653589793,
+      "Roses are": "Blue"
+    },
+    "TestName": "DefaultTest",
+    "TestCaseName": "TestCaseExample1",
+    "TestStepName": "ErrorReportExample",
+    "ErrorID": "EXAMPLE_OF_EXTENDED_ERROR",
+    "ErrorCategory": "DEBUG_EXPECTED_ERROR",
+    "ErrorDescription": "Example of an extended error report (with additional fields)"
+  },
+  {
+    "ExtraFields": {},
+    "TestName": "DefaultTest",
+    "TestCaseName": "TestCaseExample2",
+    "TestStepName": "ErrorReportExample",
+    "ErrorID": "EXAMPLE_OF_SIMPLE_ERROR",
+    "ErrorCategory": "DEBUG_EXPECTED_ERROR",
+    "ErrorDescription": "Example of a simple error report (without additional fields)"
+  },
+  {
+    "ExtraFields": {
+      "Today Date": "2024-06-03 19:04:56",
+      "1 \u002B 1": 2,
+      "Value Of PI": 3.141592653589793,
+      "Roses are": "Blue"
+    },
+    "TestName": "DefaultTest",
+    "TestCaseName": "TestCaseExample2",
+    "TestStepName": "ErrorReportExample",
+    "ErrorID": "EXAMPLE_OF_EXTENDED_ERROR",
+    "ErrorCategory": "DEBUG_EXPECTED_ERROR",
+    "ErrorDescription": "Example of an extended error report (with additional fields)"
+  }
+]
