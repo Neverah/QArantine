@@ -30,7 +30,7 @@ def main():
 
     test_library_name = args.lib if args.lib else "*"
     test_name = args.test if args.test else "*"
-    tests_root_dir = args.tests_root_dir if args.tests_root_dir else ".\\FrameworkTests"
+    tests_root_dir = args.tests_root_dir if args.tests_root_dir else ".\\QArantineTests"
     proj_root_dir = args.proj_root_dir if args.proj_root_dir else "."
 
     # Check if only a specific library or test has been requested to be tested and, if so, that they are valid

@@ -3,13 +3,13 @@ using System.Threading;
 using System.IO;
 using System;
 
-namespace TestFramework.Code
+namespace QArantine.Code
 {
     namespace Test
     {
         using System.Text.Json;
-        using TestFramework.Code.FrameworkModules;
-        public abstract class FrameworkTest
+        using QArantine.Code.FrameworkModules;
+        public abstract class QArantineTest
         {
             public enum TestState
             {
@@ -31,7 +31,7 @@ namespace TestFramework.Code
             private CancellationToken TimeoutToken;
             private readonly Dictionary<string, Func<(String, float)>> FlowChart;
 
-            public FrameworkTest()
+            public QArantineTest()
             {
                 TestStartTime = DateTime.Now;
 

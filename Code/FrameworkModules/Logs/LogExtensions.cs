@@ -1,4 +1,4 @@
-namespace TestFramework.Code.FrameworkModules
+namespace QArantine.Code.FrameworkModules
 {
     public static class LogExtensions
     {

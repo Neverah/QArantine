@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Diagnostics;
 
-namespace TestFramework.Code.FrameworkModules.VideoRecording
+namespace QArantine.Code.FrameworkModules.VideoRecording
 {
     public class ScreenRecorder
     {

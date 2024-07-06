@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
+using QArantine.Code.Test;
 
-using TestFramework.Code.Test;
-using TestFramework.Code.FrameworkModules;
-
-namespace TestFramework.FrameworkTests
+namespace QArantine.Tests
 {
-    public class DefaultTest : FrameworkTest
+    public class DefaultTest : QArantineTest
     {
 
         protected override Dictionary<string, Func<(String, float)>> CreateFlowChart()

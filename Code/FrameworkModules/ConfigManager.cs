@@ -1,20 +1,18 @@
-using System;
-using System.IO;
-using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
-namespace TestFramework.Code.FrameworkModules
+namespace QArantine.Code.FrameworkModules
 {
     public static class ConfigManager
     {
-        public const string MAIN_CONFIG_FILE_PATH = "TestFramework/Config/TestFrameworkDefault.config";
-        public const string OVERWRITE_CONFIG_FILE_PATH = "TestFramework/Config/TestFrameworkOverwrite.config";
+        public const string MAIN_CONFIG_FILE_PATH = "QArantine/Config/QArantineDefault.config";
+        public const string OVERWRITE_CONFIG_FILE_PATH = "QArantine/Config/QArantineOverwrite.config";
         private static readonly Dictionary<string, string> ConfigParams;
         private static bool IsMainConfigAlreadyLoaded = false;
 
         static ConfigManager()
         {
             ConfigParams = new();
-            LoadTestFrameworkMainConfig();
+            LoadQArantineMainConfig();
         }
 
         public static string? GetTFConfigParamAsString(string paramID)
@@ -45,20 +43,40 @@ namespace TestFramework.Code.FrameworkModules
             }
         }
 
-        private static void LoadTestFrameworkMainConfig()
+        public static int? GetTFConfigParamAsInt(string paramID)
+        {
+            if (ConfigParams.TryGetValue(paramID, out string? paramValue))
+            {
+                if (int.TryParse(paramValue, out int intValue)) return intValue;
+                LogError($"Could not parse the configuration parameter '{paramID}' to int, returning the default value: 'null'");
+                return null;
+            }
+            else
+            {
+                LogError($"The configuration parameter with ID '{paramID}' could not be found");
+                return null;
+            }
+        }
+
+        private static void LoadQArantineMainConfig()
         {
             if (IsMainConfigAlreadyLoaded) return;
 
-            ReadTestFrameworkMainConfigFile(MAIN_CONFIG_FILE_PATH);
+            bool fileLoaded = false;
+
+            fileLoaded = ReadQArantineMainConfigFile(MAIN_CONFIG_FILE_PATH);
 
             if (File.Exists(OVERWRITE_CONFIG_FILE_PATH))
-                ReadTestFrameworkMainConfigFile(OVERWRITE_CONFIG_FILE_PATH);
+                fileLoaded = ReadQArantineMainConfigFile(OVERWRITE_CONFIG_FILE_PATH);
             
             IsMainConfigAlreadyLoaded = true;
-            LogOK("TestFramework Main Config loaded");
+            if (fileLoaded)
+                LogOK("QArantine Main Config loaded");
+            else
+                LogError("QArantine Main Config could not be loaded");
         }
 
-        private static void ReadTestFrameworkMainConfigFile(string configFilePath)
+        private static bool ReadQArantineMainConfigFile(string configFilePath)
         {
             try
             {
@@ -94,8 +112,50 @@ namespace TestFramework.Code.FrameworkModules
             }
             catch (Exception ex)
             {
-                LogError($"Error reading the file '{configFilePath}': {ex.Message}");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Error reading the file '{configFilePath}': {ex.Message}");
+                Console.ForegroundColor = ConsoleColor.White;
+                return false;
             }
+            return true;
+        }
+
+        public static void UpdateConfigFileValue(string key, string newValue)
+        {
+            // Expresión regular para identificar la clave y su valor
+            string pattern = $@"^(\s*{Regex.Escape(key)}\s*:\s*)([^#\n\r]*)(.*)$";
+
+            // Crear un archivo temporal
+            string tempFilePath = Path.GetTempFileName();
+
+            using (var input = new FileStream(MAIN_CONFIG_FILE_PATH, FileMode.Open, FileAccess.Read))
+            using (var output = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write))
+            using (var reader = new StreamReader(input))
+            using (var writer = new StreamWriter(output))
+            {
+                string? line;
+                bool updated = false;
+
+                while ((line = reader.ReadLine()) != null)
+                {
+                    var match = Regex.Match(line, pattern);
+                    if (match.Success && !updated)
+                    {
+                        // Escribir la nueva línea con el nuevo valor, preservando el comentario
+                        writer.WriteLine($"{match.Groups[1].Value}{newValue}{match.Groups[3].Value}");
+                        updated = true; // Asegurarse de actualizar solo la primera ocurrencia
+                    }
+                    else
+                    {
+                        // Escribir la línea original
+                        writer.WriteLine(line);
+                    }
+                }
+            }
+
+            // Reemplazar el archivo original con el archivo temporal
+            File.Delete(MAIN_CONFIG_FILE_PATH);
+            File.Move(tempFilePath, MAIN_CONFIG_FILE_PATH);
         }
     }
 }

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TestFramework.Code.FrameworkUtils
+namespace QArantine.Code.FrameworkUtils
 {
     public static class CollectionUtils
     {

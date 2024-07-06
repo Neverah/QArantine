@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 
-namespace TestFramework.Code.TestFrameworkGUI.ViewModels;
+namespace QArantine.Code.QArantineGUI.ViewModels;
 
 public class ViewModelBase : ReactiveObject
 {

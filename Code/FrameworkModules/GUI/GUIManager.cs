@@ -3,11 +3,11 @@ using System.Threading;
 using Avalonia.Threading;
 using System.Collections.Generic;
 
-using TestFramework.Code.FrameworkModules.GUI.Logs;
-using TestFramework.Code.TestFrameworkGUI;
-using TestFramework.Code.TestFrameworkGUI.ViewModels;
+using QArantine.Code.FrameworkModules.GUI.Logs;
+using QArantine.Code.QArantineGUI;
+using QArantine.Code.QArantineGUI.ViewModels;
 
-namespace TestFramework.Code.FrameworkModules.GUI
+namespace QArantine.Code.FrameworkModules.GUI
 {
     public sealed class GUIManager
     {
@@ -41,7 +41,7 @@ namespace TestFramework.Code.FrameworkModules.GUI
             }
         }
 
-        public void StartTestFrameworkGUI()
+        public void StartQArantineGUI()
         {
             if (ConfigManager.GetTFConfigParamAsBool("GUIActive"))
             {

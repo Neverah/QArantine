@@ -4,9 +4,9 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-using TestFramework.Code.FrameworkModules;
+using QArantine.Code.FrameworkModules;
 
-namespace TestFramework.Code.FrameworkModules.Logs
+namespace QArantine.Code.FrameworkModules.Logs
 {
     public class ConsoleLogHandler : ILogHandler
     {

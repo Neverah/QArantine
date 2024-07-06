@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
 
-using TestFramework.Code.FrameworkModules.VideoRecording;
+using QArantine.Code.FrameworkModules.VideoRecording;
 
-namespace TestFramework.Code.FrameworkModules
+namespace QArantine.Code.FrameworkModules
 {
     public sealed class RecordingManager
     {   

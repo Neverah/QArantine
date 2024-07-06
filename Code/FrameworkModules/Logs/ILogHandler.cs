@@ -1,4 +1,4 @@
-namespace TestFramework.Code.FrameworkModules.Logs
+namespace QArantine.Code.FrameworkModules.Logs
 {
     public interface ILogHandler
     {

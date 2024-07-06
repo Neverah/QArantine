@@ -1,4 +1,4 @@
-namespace TestFramework.Code.FrameworkModules.GUI.Logs
+namespace QArantine.Code.FrameworkModules.GUI.Logs
 {
     public class BufferLogLine
     {

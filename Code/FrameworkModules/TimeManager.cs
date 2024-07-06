@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace TestFramework.Code.FrameworkModules
+namespace QArantine.Code.FrameworkModules
 {
     public class TimeManager
     {
@@ -9,8 +9,7 @@ namespace TestFramework.Code.FrameworkModules
 
         static TimeManager()
         {
-            AppClock = new();
-            AppClock.Start();
+            AppClock = Stopwatch.StartNew();
         }
 
         public static string GetAppElapsedSecondsAsString()

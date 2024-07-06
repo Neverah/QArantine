@@ -1,0 +1,178 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:QArantine.Code.QArantineGUI.ViewModels"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
+        x:Class="QArantine.Code.QArantineGUI.Views.ProfilingWindow"
+        x:DataType="vm:ProfilingWindowViewModel"
+        Icon="/Assets/QArantineGUI/Icons/profiling.ico"
+        Title="ProfilingTools">
+
+    <Design.DataContext>
+        <vm:ProfilingWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Background>
+        <SolidColorBrush Color="Black"/>
+    </Window.Background>
+
+    <DockPanel Margin="10">
+        <Grid DockPanel.Dock="Top">
+            <Grid.Styles>
+                <!--Button-->
+                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="LightGray" />
+                </Style>
+                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="White" />
+                </Style>
+                <Style Selector="Button">
+                    <Setter Property="Height" Value="35" />
+                    <Setter Property="Background" Value="Gray" />
+                    <Setter Property="Foreground" Value="Black" />
+                    <Setter Property="Margin" Value="5" />
+                    <Setter Property="Padding" Value="8" />
+                    <Setter Property="FontSize" Value="12" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="BorderBrush" Value="White" />
+                    <Setter Property="CornerRadius" Value="2" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                </Style>
+                <!--ComboBox-->
+                <Style Selector="ComboBox:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="LightGray" />
+                </Style>
+                <Style Selector="ComboBox:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="White" />
+                </Style>
+                <Style Selector="ComboBox">
+                    <Setter Property="Height" Value="35" />
+                    <Setter Property="Background" Value="Gray" />
+                    <Setter Property="Foreground" Value="Black" />
+                    <Setter Property="Margin" Value="5" />
+                    <Setter Property="Padding" Value="8" />
+                    <Setter Property="FontSize" Value="12" />
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="BorderBrush" Value="White" />
+                    <Setter Property="CornerRadius" Value="2" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                </Style>
+            </Grid.Styles>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Button Grid.Column="0" Content="Toggle Measurements" Command="{Binding ToggleMeasurementsCommand}" 
+                HorizontalAlignment="Left" VerticalAlignment="Top"
+                BorderBrush="{Binding ToggleMeasurementsButtonBorderColor}">
+            </Button>
+
+            <Button Grid.Column="1" Content="Toggle File Dump" Command="{Binding ToggleFileDumpCommand}" 
+                HorizontalAlignment="Left" VerticalAlignment="Top"
+                BorderBrush="{Binding ToggleFileDumpButtonBorderColor}">
+            </Button>
+
+            <TextBox Grid.Column="2" Text="{Binding FilterText, Mode=TwoWay}" 
+                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5" Height="35" Width="200" CornerRadius="2" VerticalContentAlignment="Center" TextWrapping="NoWrap"/>
+        </Grid>
+
+        <Grid DockPanel.Dock="Top">
+            <Grid.Styles>
+                <!--ListBox-->
+                <Style Selector="ListBox">
+                    <Setter Property="Background" Value="#111"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Padding" Value="4"/>
+                    <Setter Property="Margin" Value="5"/>
+                </Style>
+                <!--ListBoxItem-->
+                <Style Selector="ListBox ListBoxItem">
+                    <Setter Property="Background" Value="#111"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Padding" Value="2"/>
+                    <Setter Property="Margin" Value="2"/>
+                </Style>
+                <Style Selector="ListBox ListBoxItem:nth-child(2n)">
+                    <Setter Property="Background" Value="#1A1A1A"/>
+                </Style>
+            </Grid.Styles>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <lvc:CartesianChart Grid.Row="0" Grid.Column="0" BorderBrush="Gray" BorderThickness="0,2,0,0" Margin="0,8,0,0" 
+                Title="{Binding FlagsChartTitle}" Series="{Binding FlagsSeries}" XAxes="{Binding FlagsXAxes}" YAxes="{Binding FlagsYAxes}" Sections="{Binding FlagsYSections}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" EasingFunction="{x:Null}"/>
+
+            <lvc:CartesianChart Grid.Row="0" Grid.Column="1" BorderBrush="Gray" BorderThickness="0,2,0,0" Margin="0,8,0,0" 
+                Title="{Binding MemoryChartTitle}" Series="{Binding MemorySeries}" XAxes="{Binding MemoryXAxes}" YAxes="{Binding MemoryYAxes}" Sections="{Binding MemoryYSections}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" EasingFunction="{x:Null}"/>
+
+            <ListBox Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{Binding FlagsProfilingData}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="0,0,0,12">
+                            <ItemsControl ItemsSource="{Binding}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="4,0,4,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>                                     
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Text="{Binding ID}" Grid.Row="0" Grid.ColumnSpan="8" FontWeight="Bold" Foreground="{Binding ColorBrush}" Margin="0,4,0,0"/>
+
+                                            <TextBlock Text="Call count: " Grid.Row="1" Grid.Column="0" Foreground="White" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{Binding Count}" Grid.Row="1" Grid.Column="1" Foreground="White" HorizontalAlignment="Left"/>
+
+                                            <TextBlock Text="Average (µs): " Grid.Row="1" Grid.Column="2" Foreground="White" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{Binding Average, StringFormat=N0}" Grid.Row="1" Grid.Column="3" Foreground="White" HorizontalAlignment="Left"/>
+
+                                            <TextBlock Text="Max (µs): " Grid.Row="1" Grid.Column="4" Foreground="White" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{Binding Max, StringFormat=N0}" Grid.Row="1" Grid.Column="5" Foreground="White" HorizontalAlignment="Left"/>
+
+                                            <TextBlock Text="Min (µs): " Grid.Row="1" Grid.Column="6" Foreground="White" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{Binding Min, StringFormat=N0}" Grid.Row="1" Grid.Column="7" Foreground="White" HorizontalAlignment="Left"/>
+
+                                            <TextBlock Text="Sum (µs): " Grid.Row="1" Grid.Column="8" Foreground="White" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{Binding Sum, StringFormat=N0}" Grid.Row="1" Grid.Column="9" Foreground="White" HorizontalAlignment="Left"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </DockPanel>
+</Window>

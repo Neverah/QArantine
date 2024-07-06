@@ -7,18 +7,27 @@ using Avalonia.Platform;
 using Avalonia.VisualTree;
 using Avalonia.Interactivity;
 
-using TestFramework.Code.FrameworkModules.Logs;
-using TestFramework.Code.TestFrameworkGUI.ViewModels;
+using QArantine.Code.FrameworkModules;
+using QArantine.Code.FrameworkModules.Logs;
+using QArantine.Code.QArantineGUI.Services;
+using QArantine.Code.QArantineGUI.ViewModels;
 
-namespace TestFramework.Code.TestFrameworkGUI.Views
+namespace QArantine.Code.QArantineGUI.Views
 {
     public partial class MainWindow : Window
     {
+        private readonly WindowSettingsService _windowSettingsService;
+
         public MainWindow()
         {
             InitializeComponent();
-            this.Width = 800;
-            this.Height = 900;
+
+            _windowSettingsService = new WindowSettingsService();
+            _windowSettingsService.LoadWindowSize(this);
+
+            // Suscripción a eventos
+            this.Resized += MainWindow_Resized;
+            this.PositionChanged += MainWindow_PosChanged;
             this.Loaded += MainWindow_Loaded;
 
             // Verificar si la aplicación está en modo de aplicación de escritorio
@@ -49,6 +58,16 @@ namespace TestFramework.Code.TestFrameworkGUI.Views
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+        }
+
+        private void MainWindow_Resized(object? sender, EventArgs e)
+        {
+            _windowSettingsService.SaveWindowSizeAndPos(this);
+        }
+
+        private void MainWindow_PosChanged(object? sender, EventArgs e)
+        {
+            _windowSettingsService.SaveWindowSizeAndPos(this);
         }
 
         private void MainWindow_Loaded(object? sender, RoutedEventArgs e)

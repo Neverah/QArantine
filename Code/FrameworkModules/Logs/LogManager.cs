@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 
-using TestFramework.Code.FrameworkModules.Logs;
+using QArantine.Code.FrameworkModules.Logs;
 
-namespace TestFramework.Code.FrameworkModules
+namespace QArantine.Code.FrameworkModules
 {
     public static class LogManager
     {
@@ -27,15 +27,19 @@ namespace TestFramework.Code.FrameworkModules
         public static LogLevel LogLvl { get; set; }
         public static TestManager? TestManager { get; set; }
 
+        private static bool abortOnFatalError;
+
         static LogManager()
         {
             LogLvl = LogLevel.Warning;
 
-            InitLogLevel();
-
             consoleLogHandler = new ConsoleLogHandler();
             fileLogHandler = new FileLogHandler();
             guiLogHandler = new GUILogHandler();
+
+            InitLogLevel();
+
+            abortOnFatalError = ConfigManager.GetTFConfigParamAsBool("AbortOnFatalError");
 
             PrintInitLogMessage();
         }
@@ -54,37 +58,38 @@ namespace TestFramework.Code.FrameworkModules
 
         public static void LogFatalError(string message)
         {
-            consoleLogHandler.LogFatalError(message);
-            fileLogHandler.LogFatalError(message);
-            guiLogHandler.LogFatalError(message);
+            consoleLogHandler?.LogFatalError(message);
+            fileLogHandler?.LogFatalError(message);
+            guiLogHandler?.LogFatalError(message);
+            if (abortOnFatalError) Environment.Exit(-1);
         }
 
         public static void LogError(string message)
         {
-            consoleLogHandler.LogError(message);
-            fileLogHandler.LogError(message);
-            guiLogHandler.LogError(message);
+            consoleLogHandler?.LogError(message);
+            fileLogHandler?.LogError(message);
+            guiLogHandler?.LogError(message);
         }
 
         public static void LogOK(string message)
         {
-            consoleLogHandler.LogOK(message);
-            fileLogHandler.LogOK(message);
-            guiLogHandler.LogOK(message);
+            consoleLogHandler?.LogOK(message);
+            fileLogHandler?.LogOK(message);
+            guiLogHandler?.LogOK(message);
         }
 
         public static void LogWarning(string message)
         {
-            consoleLogHandler.LogWarning(message);
-            fileLogHandler.LogWarning(message);
-            guiLogHandler.LogWarning(message);
+            consoleLogHandler?.LogWarning(message);
+            fileLogHandler?.LogWarning(message);
+            guiLogHandler?.LogWarning(message);
         }
 
         public static void LogDebug(string message)
         {
-            consoleLogHandler.LogDebug(message);
-            fileLogHandler.LogDebug(message);
-            guiLogHandler.LogDebug(message);
+            consoleLogHandler?.LogDebug(message);
+            fileLogHandler?.LogDebug(message);
+            guiLogHandler?.LogDebug(message);
         }
 
         public static void LogTestFatalError(string message)
@@ -128,6 +133,10 @@ namespace TestFramework.Code.FrameworkModules
             if ((logLvlName = ConfigManager.GetTFConfigParamAsString("LogLevel")!) == null)
             {
                 LogError("Could not find the 'LogLevel' config param, the log can not be opened, aborting execution");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Could not find the 'LogLevel' config param, the log can not be opened, aborting execution");
+                Console.ForegroundColor = ConsoleColor.White;
+
                 Environment.Exit(-1);
             }
 

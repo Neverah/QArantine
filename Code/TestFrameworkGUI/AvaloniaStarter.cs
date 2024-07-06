@@ -2,7 +2,7 @@
 using Avalonia.ReactiveUI;
 using System;
 
-namespace TestFramework.Code.TestFrameworkGUI;
+namespace QArantine.Code.QArantineGUI;
 
 sealed class AvaloniaStarter
 {

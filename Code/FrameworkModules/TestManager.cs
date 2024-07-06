@@ -4,13 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Reflection;
 
-using TestFramework.Code.Test;
+using QArantine.Code.Test;
 
-namespace TestFramework.Code.FrameworkModules
+namespace QArantine.Code.FrameworkModules
 {
     public sealed class TestManager
     {   
-        public FrameworkTest? CurrentTest { get { return testLauncher.CurrentTest; } }
+        public QArantineTest? CurrentTest { get { return testLauncher.CurrentTest; } }
         private TestLauncher testLauncher;
 
         private static TestManager? _instance;

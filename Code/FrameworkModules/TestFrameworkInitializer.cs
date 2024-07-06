@@ -3,33 +3,33 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-using TestFramework.Code.FrameworkModules.GUI;
+using QArantine.Code.FrameworkModules.GUI;
 
-namespace TestFramework.Code.FrameworkModules
+namespace QArantine.Code.FrameworkModules
 {
-    public class TestFrameworkInitializer
+    public class QArantineInitializer
     {
-        private static bool _isTestFrameworkInitialized = false;
+        private static bool _isQArantineInitialized = false;
 
         private void CommonInit()
         {
-            if (!IsTestFrameworkInitialized())
+            if (!IsQArantineInitialized())
             {
-                GUIManager.Instance.StartTestFrameworkGUI();
-                _isTestFrameworkInitialized = true;
+                GUIManager.Instance.StartQArantineGUI();
+                _isQArantineInitialized = true;
             }
             else
             {
-                LogWarning("It seems that the TestFramework has been asked to initialize when it was already initialized, make sure that this is intentional. Generally, it is not intended to launch several tests in the same run.");
+                LogWarning("It seems that the QArantine has been asked to initialize when it was already initialized, make sure that this is intentional. Generally, it is not intended to launch several tests in the same run.");
             }
         }
 
-        public static bool IsTestFrameworkInitialized()
+        public static bool IsQArantineInitialized()
         {
-            return _isTestFrameworkInitialized;
+            return _isQArantineInitialized;
         }
 
-        public void TestFrameworkInit(string? testClassToRun = null, string? testClassAssemblyName = null)
+        public void QArantineInit(string? testClassToRun = null, string? testClassAssemblyName = null)
         {
             CommonInit();
 
@@ -40,12 +40,12 @@ namespace TestFramework.Code.FrameworkModules
             else
             {
                 #pragma warning disable CS4014
-                TestManager.Instance.LaunchTest(testClassToRun, testClassAssemblyName ?? GetCallingAssemblyName() ?? typeof(TestFramework.Code.FrameworkModules.TestManager).Assembly.GetName().Name ?? "TestFramework");
+                TestManager.Instance.LaunchTest(testClassToRun, testClassAssemblyName ?? GetCallingAssemblyName() ?? typeof(QArantine.Code.FrameworkModules.TestManager).Assembly.GetName().Name ?? "QArantine");
                 #pragma warning restore CS4014
             }
         }
 
-        public async Task TestFrameworkInitAndAwait(string? testClassToRun = null, string? testClassAssemblyName = null)
+        public async Task QArantineInitAndAwait(string? testClassToRun = null, string? testClassAssemblyName = null)
         {
             CommonInit();
 
@@ -55,7 +55,7 @@ namespace TestFramework.Code.FrameworkModules
             }
             else
             {
-                await TestManager.Instance.LaunchTest(testClassToRun, testClassAssemblyName ?? GetCallingAssemblyName() ?? typeof(TestFramework.Code.FrameworkModules.TestManager).Assembly.GetName().Name ?? "TestFramework");
+                await TestManager.Instance.LaunchTest(testClassToRun, testClassAssemblyName ?? GetCallingAssemblyName() ?? typeof(QArantine.Code.FrameworkModules.TestManager).Assembly.GetName().Name ?? "QArantine");
             }
         }
 

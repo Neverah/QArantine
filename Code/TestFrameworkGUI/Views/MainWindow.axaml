@@ -1,13 +1,13 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:TestFramework.Code.TestFrameworkGUI.ViewModels"
+        xmlns:vm="using:QArantine.Code.QArantineGUI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
-        x:Class="TestFramework.Code.TestFrameworkGUI.Views.MainWindow"
+        x:Class="QArantine.Code.QArantineGUI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/TestFrameworkGUI/Icons/test-framework.ico"
-        Title="TestFrameworkGUI">
+        Icon="/Assets/QArantineGUI/Icons/qarantine.ico"
+        Title="QArantineGUI">
 
     <Design.DataContext>
         <!-- Esto establece el DataContext solo para el visor previo en un IDE. Para establecer el DataContext real para el tiempo de ejecución, establece la propiedad DataContext en el código (mira App.axaml.cs) -->
@@ -37,7 +37,7 @@
                 <Setter Property="FontWeight" Value="Bold" />
                 <Setter Property="BorderThickness" Value="2" />
                 <Setter Property="BorderBrush" Value="White" />
-                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="CornerRadius" Value="2" />
                 <Setter Property="VerticalContentAlignment" Value="Center" />
             </Style>
             <!--ComboBox-->
@@ -57,7 +57,7 @@
                 <Setter Property="FontWeight" Value="Bold" />
                 <Setter Property="BorderThickness" Value="2" />
                 <Setter Property="BorderBrush" Value="White" />
-                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="CornerRadius" Value="2" />
                 <Setter Property="VerticalContentAlignment" Value="Center" />
             </Style>
         </Grid.Styles>
@@ -66,6 +66,7 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
@@ -85,22 +86,28 @@
         <Button Grid.Column="2" Content="Clear Log" Command="{Binding ClearLogScrollCommand}" 
             HorizontalAlignment="Left" VerticalAlignment="Top" Width="NaN">
         </Button>
+
+        <Button Grid.Column="3" ToolTip.Tip="Open Profiling Window" Command="{Binding OpenProfilingCommand}" 
+            HorizontalAlignment="Right" VerticalAlignment="Top" Width="NaN"
+            Padding="2">
+            <Button.Content>
+                <Viewbox>
+                    <Image Source="/Assets/QArantineGUI/Icons/profiling.png"/>
+                </Viewbox>
+            </Button.Content>
+        </Button>
                 
-        <!-- ScrollViewer -->
-        <ScrollViewer Grid.Row="1" Grid.ColumnSpan="3" x:Name="LogScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="5" Padding="0" Background="#111" >
+        <ScrollViewer Grid.Row="1" Grid.ColumnSpan="4" x:Name="LogScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="5" Padding="0" Background="#111" >
             <ItemsControl ItemsSource="{Binding LogLines}">
-                <ItemsControl.ItemsPanel>
-                    <!-- Utilizar VirtualizingStackPanel para mejorar el rendimiento -->
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <SelectableTextBlock Margin="4,4,0,0" FontFamily="Arial" FontSize="13" FontWeight="Bold">
-                            <Run Text="{Binding Timestamp}" Foreground="{Binding TimestampForeground}"/>
-                            <Run Text="{Binding TestTag}" Foreground="{Binding TestTagForeground}"/>
-                            <Run Text="{Binding LogBody}" Foreground="{Binding LogBodyForeground}"/>
+                            <Run Text="{Binding Timestamp, FallbackValue='!NullTextFound!', TargetNullValue='!NullTextFound!'}" 
+                                 Foreground="{Binding TimestampForeground, FallbackValue='Blue', TargetNullValue='Blue'}"/>
+                            <Run Text="{Binding TestTag, FallbackValue='!NullTextFound!', TargetNullValue='!NullTextFound!'}" 
+                                 Foreground="{Binding TestTagForeground, FallbackValue='Blue', TargetNullValue='Blue'}"/>
+                            <Run Text="{Binding LogBody, FallbackValue='!NullTextFound!', TargetNullValue='!NullTextFound!'}" 
+                                 Foreground="{Binding LogBodyForeground, FallbackValue='Blue', TargetNullValue='Blue'}"/>
                         </SelectableTextBlock>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

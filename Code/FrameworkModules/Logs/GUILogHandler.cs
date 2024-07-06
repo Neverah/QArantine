@@ -4,12 +4,12 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-using TestFramework.Code.FrameworkModules;
-using TestFramework.Code.FrameworkModules.GUI;
-using TestFramework.Code.FrameworkModules.GUI.Logs;
-using TestFramework.Code.TestFrameworkGUI.ViewModels;
+using QArantine.Code.FrameworkModules;
+using QArantine.Code.FrameworkModules.GUI;
+using QArantine.Code.FrameworkModules.GUI.Logs;
+using QArantine.Code.QArantineGUI.ViewModels;
 
-namespace TestFramework.Code.FrameworkModules.Logs
+namespace QArantine.Code.FrameworkModules.Logs
 {
     public class GUILogHandler : ILogHandler
     {

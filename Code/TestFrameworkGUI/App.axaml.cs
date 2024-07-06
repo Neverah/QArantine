@@ -1,10 +1,11 @@
 using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using TestFramework.Code.TestFrameworkGUI.ViewModels;
-using TestFramework.Code.TestFrameworkGUI.Views;
+using Avalonia.Controls.ApplicationLifetimes;
 
-namespace TestFramework.Code.TestFrameworkGUI;
+using QArantine.Code.QArantineGUI.ViewModels;
+using QArantine.Code.QArantineGUI.Views;
+
+namespace QArantine.Code.QArantineGUI;
 
 public partial class App : Application
 {

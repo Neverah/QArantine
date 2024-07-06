@@ -2,11 +2,11 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-using TestFramework.Code.FrameworkModules;
-using TestFramework.Code.TestFrameworkGUI;
-using TestFramework.Code.TestFrameworkGUI.ViewModels;
+using QArantine.Code.FrameworkModules;
+using QArantine.Code.QArantineGUI;
+using QArantine.Code.QArantineGUI.ViewModels;
 
-namespace TestFramework.Code.FrameworkModules.GUI.Logs
+namespace QArantine.Code.FrameworkModules.GUI.Logs
 {
     public class LogBuffer
     {

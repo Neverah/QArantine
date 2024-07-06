@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-using TestFramework.Code.FrameworkUtils;
+using QArantine.Code.FrameworkUtils;
 
-namespace TestFramework.Code
+namespace QArantine.Code
 {
     namespace Test
     {

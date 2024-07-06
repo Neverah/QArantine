@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 
-namespace TestFramework.Code
+namespace QArantine.Code
 {
     namespace Test
     {
-        using TestFramework.Code.FrameworkModules;
+        using QArantine.Code.FrameworkModules;
         public class TestStep
         {
             public TestCase ParentTestCase { get; private set;}

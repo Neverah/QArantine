@@ -4,13 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Reflection;
 
-using TestFramework.Code.Test;
+using QArantine.Code.Test;
 
-namespace TestFramework.Code.FrameworkModules
+namespace QArantine.Code.FrameworkModules
 {
     public sealed class TestLauncher
     {
-        public FrameworkTest? CurrentTest { get; private set; }
+        public QArantineTest? CurrentTest { get; private set; }
 
         private string? OutputRootPath;
         private string? TestsNamespace;
@@ -42,9 +42,9 @@ namespace TestFramework.Code.FrameworkModules
         {
             if (OutputRootPath != null && OutputRootPath != "") return OutputRootPath;
 
-            if ((OutputRootPath = ConfigManager.GetTFConfigParamAsString("TestFrameworkOutputRootPath")!) == null)
+            if ((OutputRootPath = ConfigManager.GetTFConfigParamAsString("QArantineOutputRootPath")!) == null)
             {
-                LogFatalError("Could not find the 'TestFrameworkOutputRootPath' config param, the test can not continue, aborting");
+                LogFatalError("Could not find the 'QArantineOutputRootPath' config param, the test can not continue, aborting");
                 Environment.Exit(-1);
             }
             
@@ -108,9 +108,9 @@ namespace TestFramework.Code.FrameworkModules
             return testAssembly;
         }
 
-        private FrameworkTest? GetTestInstance(Type testClass)
+        private QArantineTest? GetTestInstance(Type testClass)
         {
-            FrameworkTest? testInstance = (FrameworkTest?)Activator.CreateInstance(testClass);
+            QArantineTest? testInstance = (QArantineTest?)Activator.CreateInstance(testClass);
             if (testInstance == null)
             {
                 LogFatalError($"An instance of the test class could not be created: {testClass.Name}");

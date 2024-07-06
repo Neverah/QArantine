@@ -1,18 +1,14 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 
-using TestFramework.Code.Test;
-using TestFramework.Code.FrameworkModules;
-using TestFramework.Code.FrameworkModules.GUI;
-using TestFramework.Code.TestFrameworkGUI.ViewModels;
+using QArantine.Code.Test;
+using QArantine.Code.FrameworkModules;
+using QArantine.Code.FrameworkModules.GUI;
+using QArantine.Code.QArantineGUI.ViewModels;
 
-namespace TestFramework.FrameworkTests
+namespace QArantine.Tests
 {
-    public class TestLogSystems : FrameworkTest
+    public class TestLogSystems : QArantineTest
     {
         private LogManager.LogLevel CurrentCaseLogLevel;
         private int CurrentCaseInitExpectedPrints = 0;

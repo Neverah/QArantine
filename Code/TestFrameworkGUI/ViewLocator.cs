@@ -1,9 +1,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using TestFramework.Code.TestFrameworkGUI.ViewModels;
+using QArantine.Code.QArantineGUI.ViewModels;
 
-namespace TestFramework.Code.TestFrameworkGUI;
+namespace QArantine.Code.QArantineGUI;
 
 public class ViewLocator : IDataTemplate
 {

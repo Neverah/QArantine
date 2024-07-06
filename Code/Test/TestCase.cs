@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 
-namespace TestFramework.Code
+namespace QArantine.Code
 {
     namespace Test
     {
-        using TestFramework.Code.FrameworkModules;
+        using QArantine.Code.FrameworkModules;
         public class TestCase
         {
             public enum TestCaseState 
@@ -18,13 +18,13 @@ namespace TestFramework.Code
             private TestCaseState _State;
             public Dictionary<string, object> TestCaseData { get; } // public so it can be serialized
 
-            public FrameworkTest ParentTest { get; }
+            public QArantineTest ParentTest { get; }
             public string ID { get; }
             public TestStep CurrentStep{ get => _CurrentStep; }
             public TestCaseState State { get => _State; }
             public HashSet<TestError> TestCaseErrors { get; }
 
-            public TestCase(FrameworkTest parentTest, string ID)
+            public TestCase(QArantineTest parentTest, string ID)
             {
                 ParentTest = parentTest;
                 this.ID = ID;

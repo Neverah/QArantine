@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace TestFramework.Code.FrameworkUtils
+namespace QArantine.Code.FrameworkUtils
 {
     public static class FileSysUtils
     {
