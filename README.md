@@ -4,7 +4,7 @@ Note: I'm developing this project coupled to a private videogame project with mo
 
 As a preview, this is how the GUI of some QArantine functionalities looks like when running:
 
-Log System and var tracker:
+Log System and Var Tracker:
 ![Log](https://github.com/user-attachments/assets/0c8494ab-81bf-4a57-b242-916e3903260e)
 (Yes, the player is on the ground, that is indeed a bug in the game. Thanks QArantine <3)
 
