@@ -10,3 +10,7 @@ Log System and var tracker:
 
 Performance profiler:
 ![Profiler](https://github.com/user-attachments/assets/c6b64247-bb2c-472e-aeee-2d07295ca160)
+
+Among other functionalities implemented so far, such as:
+- A TestFramework to develop automatic tests to test the game autonomously.
+- A multi-project Launcher to make and test builds, and visualize the outputs.
