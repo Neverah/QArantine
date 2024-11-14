@@ -66,6 +66,10 @@ namespace QArantine.Code.QArantineGUI.Services
             }
 
             var updatedJson = JsonSerializer.Serialize(settingsList, new JsonSerializerOptions { WriteIndented = true });
+
+            string? directoryPath = Path.GetDirectoryName(SettingsFile);
+            if (directoryPath != null) Directory.CreateDirectory(directoryPath);
+            
             File.WriteAllText(SettingsFile, updatedJson);
         }
     }
