@@ -1,6 +1,6 @@
-QArantine is a multi-purpose QA automation tool that aims to facilitate the QA work during the development of applications (mainly focused on video games) in C#.
+QArantine is a multi-purpose QA automation tool that aims to facilitate the QA work during the development of video games in C#.
 
-Note: I'm developing this project coupled to a private videogame project with more collaborators, so I just copy the progress here when I reach certain milestones. This is not the main repository where I develop the project, but a sample of the code. QArantine needs a project to be coupled to take advantage of most features.
+Note: I'm developing this project coupled to a private indie videogame project with more collaborators, so I just copy the progress here when I reach certain milestones. This is not the main repository where I develop the project, but a sample of the code. QArantine needs a project to be coupled to take advantage of most features.
 
 As a preview, this is how the GUI of some QArantine functionalities looks like when running:
 
