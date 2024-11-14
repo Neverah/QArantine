@@ -6,6 +6,7 @@ As a preview, this is how the GUI of some QArantine functionalities looks like w
 
 Log System and var tracker:
 ![Log](https://github.com/user-attachments/assets/0c8494ab-81bf-4a57-b242-916e3903260e)
+(Yes, the player is on the ground, that is indeed a bug in the game. Thanks QArantine <3)
 
 Performance profiler:
 ![Profiler](https://github.com/user-attachments/assets/c6b64247-bb2c-472e-aeee-2d07295ca160)
