@@ -1,10 +1,4 @@
-using System.Threading;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-
-using QArantine.Code.FrameworkModules;
-using QArantine.Code.QArantineGUI;
-using QArantine.Code.QArantineGUI.ViewModels;
 
 namespace QArantine.Code.FrameworkModules.GUI.Logs
 {
@@ -17,7 +11,7 @@ namespace QArantine.Code.FrameworkModules.GUI.Logs
         public LogBuffer()
         {
             LogMutex = new();
-            LogLinesBuffer = new();
+            LogLinesBuffer = [];
         }
 
         public void AddLogLine(BufferLogLine logLine)

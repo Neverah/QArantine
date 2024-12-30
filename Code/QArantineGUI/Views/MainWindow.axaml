@@ -1,0 +1,98 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:QArantine.Code.QArantineGUI.ViewModels"
+        xmlns:conv="clr-namespace:QArantine.Code.QArantineGUI.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
+        x:Class="QArantine.Code.QArantineGUI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/QArantineGUI/Icons/qarantine.ico"
+        Title="QArantineGUI">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Resources>
+        <conv:ImagePathToBitmapConverter x:Key="ImagePathToBitmapConverter"/>
+    </Window.Resources>
+
+    <Window.Background>
+        <SolidColorBrush Color="Black"/>
+    </Window.Background>
+
+    <Grid Margin="10">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ComboBox x:Name="LogLvlComboBox" ToolTip.Tip="Change Log Level" Grid.Column="0" ItemsSource="{Binding AvailableLogLvls}" SelectedIndex="{Binding SelectedLogLvl}"
+            HorizontalAlignment="Left" VerticalAlignment="Top" Width="NaN" Foreground="{Binding LogLvlButtonForegroundColor}">
+        </ComboBox>
+
+        <Button Grid.Column="1" ToolTip.Tip="Toggle Auto Scroll" Command="{Binding ToggleAutoScrollCommand}" 
+            HorizontalAlignment="Left" VerticalAlignment="Top" Width="NaN">
+            <Button.Content>
+                <Viewbox>
+                    <Image Source="{Binding AutoScrollButtonIcon, Converter={StaticResource ImagePathToBitmapConverter}}" RenderOptions.BitmapInterpolationMode="MediumQuality"/>
+                </Viewbox>
+            </Button.Content>
+        </Button>
+
+        <Button Grid.Column="2" ToolTip.Tip="Clear Log" Command="{Binding ClearLogScrollCommand}" 
+            HorizontalAlignment="Left" VerticalAlignment="Top" Width="NaN">
+            <Button.Content>
+                <Viewbox>
+                    <Image Source="/Assets/QArantineGUI/Icons/Clear.png" RenderOptions.BitmapInterpolationMode="MediumQuality"/>
+                </Viewbox>
+            </Button.Content>
+        </Button>
+
+        <Button Grid.Column="4" ToolTip.Tip="Open VarTracking Window" Command="{Binding OpenVarTrackingCommand}" 
+            HorizontalAlignment="Right" VerticalAlignment="Top" Width="NaN">
+            <Button.Content>
+                <Viewbox>
+                    <Image Source="/Assets/QArantineGUI/Icons/VarTracking.png" RenderOptions.BitmapInterpolationMode="MediumQuality"/>
+                </Viewbox>
+            </Button.Content>
+        </Button>
+
+        <Button Grid.Column="5" ToolTip.Tip="Open Profiling Window" Command="{Binding OpenProfilingCommand}" 
+            HorizontalAlignment="Right" VerticalAlignment="Top" Width="NaN">
+            <Button.Content>
+                <Viewbox>
+                    <Image Source="/Assets/QArantineGUI/Icons/profiling.png" RenderOptions.BitmapInterpolationMode="MediumQuality"/>
+                </Viewbox>
+            </Button.Content>
+        </Button>
+                
+        <ScrollViewer Grid.Row="1" Grid.ColumnSpan="6" x:Name="LogScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="5" Padding="0" Background="#111" >
+            <ItemsControl ItemsSource="{Binding LogLines}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <SelectableTextBlock Margin="4,4,0,0" FontFamily="Calibri" FontSize="13" FontWeight="Bold">
+                            <Run Text="{Binding Timestamp, FallbackValue='!NullTextFound!', TargetNullValue='!NullTextFound!'}" 
+                                 Foreground="{Binding TimestampForeground, FallbackValue='Blue', TargetNullValue='Blue'}"/>
+                            <Run Text="{Binding TestTag, FallbackValue='!NullTextFound!', TargetNullValue='!NullTextFound!'}" 
+                                 Foreground="{Binding TestTagForeground, FallbackValue='Blue', TargetNullValue='Blue'}"/>
+                            <Run Text="{Binding LogBody, FallbackValue='!NullTextFound!', TargetNullValue='!NullTextFound!'}" 
+                                 Foreground="{Binding LogBodyForeground, FallbackValue='Blue', TargetNullValue='Blue'}"/>
+                        </SelectableTextBlock>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Window>

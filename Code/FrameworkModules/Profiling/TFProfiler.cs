@@ -1,12 +1,6 @@
-using System;
-using System.IO;
 using System.Diagnostics;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Text.Json;
-using System.Threading;
-
-using QArantine.Code.FrameworkModules;
 
 namespace QArantine.Code.FrameworkModules.Profiling
 {
@@ -17,21 +11,21 @@ namespace QArantine.Code.FrameworkModules.Profiling
         private ConcurrentDictionary<string, FlagMeter> flagMeters;
         private Timer? updateTimer;
         private StreamWriter? fileWriter;
-        private readonly object _fileLock = new object();
-        private readonly object _updateLock = new object();
-        private int updateInterval { get; set; } = 1000; // 1 second
+        private readonly object _fileLock = new();
+        private readonly object _updateLock = new();
+        private int _updateInterval { get; set; } = 1000; // 1 second
         private bool isUpdateTimerActive = false;
-        public bool isMeasurementActive { get; private set; } = false;
-        public bool isFileDumpActive { get; private set; } = false;
-        public string baseDumpFileName { get; set; } = "ProfMeasurements";
+        public bool IsMeasurementActive { get; private set; } = false;
+        public bool IsFileDumpActive { get; private set; } = false;
+        public string BaseDumpFileName { get; set; } = "ProfMeasurements";
         public event EventHandler<ProfilingDataEventArgs>? StatsUpdated;
 
         public int UpdateInterval
         {
-            get => updateInterval;
+            get => _updateInterval;
             set
             {
-                updateInterval = value;
+                _updateInterval = value;
                 ChangeUpdateTimerInterval();
             }
         }
@@ -62,7 +56,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
             lock (_fileLock)
             {
                 fileWriter?.Close();
-                fileWriter = new StreamWriter(baseDumpFileName + "_" + DateTime.Now.Ticks.ToString() + ".json", false);
+                fileWriter = new StreamWriter(BaseDumpFileName + "_" + DateTime.Now.Ticks.ToString() + ".json", false);
                 fileWriter.WriteLine("{\"traceEvents\": [");
             }
         }
@@ -79,7 +73,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
 
         public void StartFlagMeasurement(string flagID, string category, long? callIndex = null, string? callID = null)
         {
-            if (!isMeasurementActive) return;
+            if (!IsMeasurementActive) return;
 
             int threadID = Thread.CurrentThread.ManagedThreadId;
             string key = GetFlagKey(flagID, category, threadID);
@@ -89,7 +83,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
 
         public void StopFlagMeasurement(string flagID, string category)
         {
-            if (!isMeasurementActive) return;
+            if (!IsMeasurementActive) return;
 
             int threadID = Thread.CurrentThread.ManagedThreadId;
             string key = GetFlagKey(flagID, category, threadID);
@@ -101,7 +95,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
 
         private void UpdateGatheredData(object? state)
         {
-            List<FlagStats> newStats = new List<FlagStats>();
+            List<FlagStats> newStats = [];
 
             lock (_updateLock)
             {
@@ -110,7 +104,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
                     FlagStats stats = flagMeter.GetFlagStats();
                     newStats.Add(stats);
 
-                    if (isFileDumpActive)
+                    if (IsFileDumpActive)
                     {
                         List<object> traces = flagMeter.ExportTraces();
                         if (traces.Count > 0)
@@ -138,24 +132,24 @@ namespace QArantine.Code.FrameworkModules.Profiling
 
         public void SetMeasurementEnabledState(bool enabled)
         {
-            if (!isMeasurementActive && enabled)
+            if (!IsMeasurementActive && enabled)
             {
                 StartMeasurement();
                 StartUpdateTimer();
             }
 
-            isMeasurementActive = enabled;
+            IsMeasurementActive = enabled;
 
-            if (!isMeasurementActive && isFileDumpActive) SetFileDumpEnabledState(false);
-            if (!isMeasurementActive) StopUpdateTimer();
+            if (!IsMeasurementActive && IsFileDumpActive) SetFileDumpEnabledState(false);
+            if (!IsMeasurementActive) StopUpdateTimer();
         }
 
         public void SetFileDumpEnabledState(bool enabled)
         {   
-            if (!isFileDumpActive && enabled && isMeasurementActive) StartFileDump();
-            if (isFileDumpActive && !enabled) FinalizeTrace();
+            if (!IsFileDumpActive && enabled && IsMeasurementActive) StartFileDump();
+            if (IsFileDumpActive && !enabled) FinalizeTrace();
 
-            isFileDumpActive = enabled && isMeasurementActive;
+            IsFileDumpActive = enabled && IsMeasurementActive;
         }
 
         private void StartUpdateTimer()
@@ -164,7 +158,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
             {
                 if (isUpdateTimerActive) return;
 
-                updateTimer = new Timer(UpdateGatheredData, null, updateInterval, updateInterval);
+                updateTimer = new Timer(UpdateGatheredData, null, _updateInterval, _updateInterval);
                 isUpdateTimerActive = true;
             }
         }
@@ -186,7 +180,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
         {
             lock (_updateLock)
             {
-                updateTimer?.Change(updateInterval, updateInterval);
+                updateTimer?.Change(_updateInterval, _updateInterval);
             }
         }
 
@@ -202,12 +196,12 @@ namespace QArantine.Code.FrameworkModules.Profiling
 
         private double GetMemoryWorkingSet()
         {
-            return (double)currentProcess.WorkingSet64;
+            return currentProcess.WorkingSet64;
         }
 
         private double GetPrivateMemorySize()
         {
-            return (double)currentProcess.PrivateMemorySize64;
+            return currentProcess.PrivateMemorySize64;
         }
     }
 }

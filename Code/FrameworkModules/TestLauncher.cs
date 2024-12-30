@@ -93,9 +93,9 @@ namespace QArantine.Code.FrameworkModules
             return testClass;
         }
 
-        private Assembly? GetTestAssembly(string assemblyName)
+        private static Assembly? GetTestAssembly(string assemblyName)
         {
-            Assembly? testAssembly = null;
+            Assembly? testAssembly;
             try
             {
                 testAssembly = Assembly.Load(assemblyName);
@@ -108,7 +108,7 @@ namespace QArantine.Code.FrameworkModules
             return testAssembly;
         }
 
-        private QArantineTest? GetTestInstance(Type testClass)
+        private static QArantineTest? GetTestInstance(Type testClass)
         {
             QArantineTest? testInstance = (QArantineTest?)Activator.CreateInstance(testClass);
             if (testInstance == null)
@@ -119,7 +119,7 @@ namespace QArantine.Code.FrameworkModules
             return testInstance;
         }
 
-        private MethodInfo? GetTestLaunchMethod(Type testClass)
+        private static MethodInfo? GetTestLaunchMethod(Type testClass)
         {
             MethodInfo? testLaunchMethod = testClass.GetMethod("Launch");
             if (testLaunchMethod == null)
@@ -138,10 +138,12 @@ namespace QArantine.Code.FrameworkModules
 
             CurrentTestThread = new(() =>
             {
-                object[] arguments = new object[] {TestCancellationTokenSource.Token};
+                object[] arguments = [TestCancellationTokenSource.Token];
                 testLaunchMethod.Invoke(CurrentTest, arguments);
-            });
-            CurrentTestThread.IsBackground = true;
+            })
+            {
+                IsBackground = true
+            };
             CurrentTestThread.Start();
         }
 

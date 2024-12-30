@@ -1,13 +1,8 @@
-using System;
-using System.IO;
 using System.Reflection;
 using System.Diagnostics;
-using System.Collections.Generic;
 
-using QArantine.Code.FrameworkModules;
 using QArantine.Code.FrameworkModules.GUI;
 using QArantine.Code.FrameworkModules.GUI.Logs;
-using QArantine.Code.QArantineGUI.ViewModels;
 
 namespace QArantine.Code.FrameworkModules.Logs
 {
@@ -15,7 +10,7 @@ namespace QArantine.Code.FrameworkModules.Logs
     {
         public static readonly Dictionary<LogManager.LogLevel, string> LogColorConsoleWindowMap = new()
         {
-            { LogManager.LogLevel.None, "#581845" },
+            { LogManager.LogLevel.None, "#99AAB5" },
             { LogManager.LogLevel.FatalError, "#B44141" },
             { LogManager.LogLevel.Error, "#DC4545" },
             { LogManager.LogLevel.OK, "#3CB93C" },

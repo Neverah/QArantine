@@ -1,11 +1,7 @@
-using System;
-using System.Linq;
 using System.Windows.Input;
 using System.ComponentModel;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Avalonia.Threading;
-using Avalonia.Controls;
 using Avalonia.Media;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
@@ -16,7 +12,8 @@ using SkiaSharp;
 
 using QArantine.Code.FrameworkModules.Profiling;
 using QArantine.Code.QArantineGUI.Models;
-using static QArantine.Code.QArantineGUI.Models.ColorPalettes;
+using QArantine.Code.QArantineGUI.StaticData;
+using static QArantine.Code.QArantineGUI.StaticData.ColorPalettes;
 
 namespace QArantine.Code.QArantineGUI.ViewModels
 {
@@ -38,30 +35,39 @@ namespace QArantine.Code.QArantineGUI.ViewModels
         public List<RectangularSection> MemoryYSections { get; private set; }
         public ICommand ToggleMeasurementsCommand { get; }
         public ICommand ToggleFileDumpCommand { get; }
+        public ICommand ToggleQArantineFilterCommand { get; }
+        public ICommand ClearProfilingDataCommand { get; }
         private bool isToggleMeasurementsEnabled;
         private bool isToggleFileDumpEnabled;
-        private IBrush toggleMeasurementsButtonBorderColor;
-        private IBrush toggleFileDumpButtonBorderColor;
-        private Dictionary<string, int[]> flagColors;
-        private readonly object flagsProfilingDataLock = new object();
+        private bool isQArantineFilterEnabled;
+        private string toggleMeasurementsButtonIcon;
+        private string toggleFileDumpButtonIcon;
+        private string toggleQArantineFilterButtonIcon;
+        private readonly Dictionary<string, int[]> flagColors;
+        private readonly object flagsProfilingDataLock = new();
+        private readonly object memoryDataLock = new();
         private string filterText;
 
         public ProfilingWindowViewModel()
         {
             ToggleMeasurementsCommand = new RelayCommand(ToggleMeasurements);
             ToggleFileDumpCommand = new RelayCommand(ToggleFileDump);
+            ToggleQArantineFilterCommand = new RelayCommand(ToggleQArantineFilter);
+            ClearProfilingDataCommand = new RelayCommand(ClearProfilingData);
 
-            isToggleMeasurementsEnabled = TFProfiler.Instance.isMeasurementActive;
-            isToggleFileDumpEnabled = TFProfiler.Instance.isFileDumpActive;
-            toggleMeasurementsButtonBorderColor = TFProfiler.Instance.isMeasurementActive ? new SolidColorBrush(Color.Parse("#3CB93C")) : new SolidColorBrush(Color.Parse("#B44141"));
-            toggleFileDumpButtonBorderColor = TFProfiler.Instance.isFileDumpActive ? new SolidColorBrush(Color.Parse("#3CB93C")) : new SolidColorBrush(Color.Parse("#B44141"));
+            isToggleMeasurementsEnabled = TFProfiler.Instance.IsMeasurementActive;
+            isToggleFileDumpEnabled = TFProfiler.Instance.IsFileDumpActive;
+            isQArantineFilterEnabled = true;
+            toggleMeasurementsButtonIcon = GetCurrentToggleMeasurementsIcon();
+            toggleFileDumpButtonIcon = GetCurrentToggleFileDumpIcon();
+            toggleQArantineFilterButtonIcon = GetCurrentQArantineFilterButtonIcon();
 
             filterText = "";
 
             // Flags Profiling
-            flagsProfilingData = new ObservableCollection<ObservableCollection<GUIFlagStats>>();
+            flagsProfilingData = [];
 
-            flagColors = new Dictionary<string, int[]>();
+            flagColors = [];
 
             FlagsChartTitle = new LabelVisual
             {
@@ -71,47 +77,45 @@ namespace QArantine.Code.QArantineGUI.ViewModels
                 Paint = new SolidColorPaint(SKColors.White)
             };
 
-            FlagsSeries = new ISeries[]
-            {
+            FlagsSeries =
+            [
                 new StackedColumnSeries<double>
                 {
-                    Values = new double[] {},
+                    Values = [],
                     Name = "No data found yet"
                 }
-            };
-            FlagsXAxes = new List<Axis>
-            {
-                new Axis { Labels = new string[] {} }
-            };
-            FlagsYAxes = new List<Axis>
-            {
+            ];
+            FlagsXAxes =
+            [
+                new Axis { Labels = [] }
+            ];
+            FlagsYAxes =
+            [
                 new Axis
                 {
                     Name = "Microseconds (µs)",
                     Labeler = value => $"{value} µs"
                 }
-            };
-            FlagsYSections = new List<RectangularSection>
-            {
-                new RectangularSection
-                {
+            ];
+            FlagsYSections =
+            [
+                new() {
                     Yi = 16667,
                     Yj = 16667,
-                    Stroke = new SolidColorPaint { StrokeThickness = 3, Color = SKColors.Green.WithAlpha(150), PathEffect = new DashEffect(new float[] { 6, 6 }) },
+                    Stroke = new SolidColorPaint { StrokeThickness = 3, Color = SKColors.Green.WithAlpha(150), PathEffect = new DashEffect([6, 6]) },
                     Label = "60 FPS"
                 },
-                new RectangularSection
-                {
+                new() {
                     Yi = 33333,
                     Yj = 33333,
-                    Stroke = new SolidColorPaint { StrokeThickness = 3, Color = SKColors.Yellow.WithAlpha(90), PathEffect = new DashEffect(new float[] { 6, 6 }) },
+                    Stroke = new SolidColorPaint { StrokeThickness = 3, Color = SKColors.Yellow.WithAlpha(90), PathEffect = new DashEffect([6, 6]) },
                     Label = "30 FPS",
                 }
-            };
+            ];
 
             // Memory Profiling
-            memoryWorkingSetProfilingData = new ObservableCollection<SysStats>();
-            privateMemorySizeProfilingData = new ObservableCollection<SysStats>();
+            memoryWorkingSetProfilingData = [];
+            privateMemorySizeProfilingData = [];
 
             MemoryChartTitle = new LabelVisual
             {
@@ -121,43 +125,41 @@ namespace QArantine.Code.QArantineGUI.ViewModels
                 Paint = new SolidColorPaint(SKColors.White)
             };
 
-            MemorySeries = new ISeries[]
-            {
+            MemorySeries =
+            [
                 new StackedColumnSeries<double>
                 {
-                    Values = new double[] {},
+                    Values = [],
                     Name = "No data found yet"
                 }
-            };
-            MemoryXAxes = new List<Axis>
-            {
-                new Axis { Labels = new string[] {} }
-            };
-            MemoryYAxes = new List<Axis>
-            {
+            ];
+            MemoryXAxes =
+            [
+                new Axis { Labels = [] }
+            ];
+            MemoryYAxes =
+            [
                 new Axis
                 {
                     Name = "Bytes",
                     Labeler = value => $"{value / 1000000:0.##} MB"
                 }
-            };
-            MemoryYSections = new List<RectangularSection>
-            {
-                new RectangularSection
-                {
+            ];
+            MemoryYSections =
+            [
+                new() {
                     Yi = 500000000,
                     Yj = 500000000,
                     Stroke = new SolidColorPaint { StrokeThickness = 3, Color = SKColors.Green.WithAlpha(150), PathEffect = new DashEffect(new float[] { 6, 6 }) },
                     Label = "1 GB"
                 },
-                new RectangularSection
-                {
+                new() {
                     Yi = 1000000000,
                     Yj = 1000000000,
                     Stroke = new SolidColorPaint { StrokeThickness = 3, Color = SKColors.Yellow.WithAlpha(90), PathEffect = new DashEffect(new float[] { 6, 6 }) },
                     Label = "500 MB",
                 }
-            };
+            ];
 
             // Events
             TFProfiler.Instance.StatsUpdated += OnStatsUpdated;
@@ -170,10 +172,6 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             {
                 filterText = value;
                 RaisePropertyChanged(nameof(FilterText));
-                lock (flagsProfilingDataLock)
-                {
-                    FlagsProfilingData.Clear();
-                }
             }
         }
 
@@ -212,15 +210,19 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             get { return isToggleMeasurementsEnabled; }
             set
             {
-                if (TFProfiler.Instance.isMeasurementActive != value)
+                if (TFProfiler.Instance.IsMeasurementActive != value)
                 {
                     TFProfiler.Instance.SetMeasurementEnabledState(value);
-                    isToggleMeasurementsEnabled = TFProfiler.Instance.isMeasurementActive;
+                    isToggleMeasurementsEnabled = TFProfiler.Instance.IsMeasurementActive;
                     RaisePropertyChanged(nameof(IsToggleMeasurementsEnabled));
-                    ToggleMeasurementsButtonBorderColor = isToggleMeasurementsEnabled ? new SolidColorBrush(Color.Parse("#3CB93C")) : new SolidColorBrush(Color.Parse("#B44141"));
-                    
-                    if (isToggleMeasurementsEnabled) FlagsProfilingData.Clear();
+
+                    if (!isToggleMeasurementsEnabled)
+                    {
+                        isToggleFileDumpEnabled = false;
+                        IsToggleFileDumpEnabled = false;
+                    }
                 }
+                ToggleMeasurementsButtonIcon = GetCurrentToggleMeasurementsIcon();
             }
         }
 
@@ -229,34 +231,69 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             get { return isToggleFileDumpEnabled; }
             set
             {
-                if (TFProfiler.Instance.isFileDumpActive != value)
+                if (TFProfiler.Instance.IsFileDumpActive != value)
                 {
                     TFProfiler.Instance.SetFileDumpEnabledState(value);
-                    isToggleFileDumpEnabled = TFProfiler.Instance.isFileDumpActive;
+                    isToggleFileDumpEnabled = TFProfiler.Instance.IsFileDumpActive;
                     RaisePropertyChanged(nameof(IsToggleFileDumpEnabled));
-                    ToggleFileDumpButtonBorderColor = isToggleFileDumpEnabled ? new SolidColorBrush(Color.Parse("#3CB93C")) : new SolidColorBrush(Color.Parse("#B44141"));
                 }
+                ToggleFileDumpButtonIcon = GetCurrentToggleFileDumpIcon();
             }
         }
 
-        public IBrush ToggleMeasurementsButtonBorderColor
+        public bool IsQArantineFilterEnabled
         {
-            get { return toggleMeasurementsButtonBorderColor; }
-            set
-            {
-                toggleMeasurementsButtonBorderColor = value;
-                RaisePropertyChanged(nameof(ToggleMeasurementsButtonBorderColor));
+            get { return isQArantineFilterEnabled; }
+            set 
+            { 
+                isQArantineFilterEnabled = value;
+                ToggleQArantineFilterButtonIcon = GetCurrentQArantineFilterButtonIcon();
             }
         }
 
-        public IBrush ToggleFileDumpButtonBorderColor
+        public string ToggleMeasurementsButtonIcon
         {
-            get { return toggleFileDumpButtonBorderColor; }
+            get { return toggleMeasurementsButtonIcon; }
             set
             {
-                toggleFileDumpButtonBorderColor = value;
-                RaisePropertyChanged(nameof(ToggleFileDumpButtonBorderColor));
+                toggleMeasurementsButtonIcon = value;
+                RaisePropertyChanged(nameof(ToggleMeasurementsButtonIcon));
             }
+        }
+
+        public string ToggleFileDumpButtonIcon
+        {
+            get { return toggleFileDumpButtonIcon; }
+            set
+            {
+                toggleFileDumpButtonIcon = value;
+                RaisePropertyChanged(nameof(ToggleFileDumpButtonIcon));
+            }
+        }
+
+        public string ToggleQArantineFilterButtonIcon
+        {
+            get { return toggleQArantineFilterButtonIcon; }
+            set
+            {
+                toggleQArantineFilterButtonIcon = value;
+                RaisePropertyChanged(nameof(ToggleQArantineFilterButtonIcon));
+            }
+        }
+
+        private string GetCurrentToggleMeasurementsIcon()
+        {
+            return TFProfiler.Instance.IsMeasurementActive ? IconsDictionary.QArantineIconsDictionary["ProfMeasurements_Enabled"] : IconsDictionary.QArantineIconsDictionary["ProfMeasurements_Disabled"];
+        }
+
+        private string GetCurrentToggleFileDumpIcon()
+        {
+            return TFProfiler.Instance.IsFileDumpActive ? IconsDictionary.QArantineIconsDictionary["ProfFileDump_Enabled"] : IconsDictionary.QArantineIconsDictionary["ProfFileDump_Disabled"];
+        }
+
+        private string GetCurrentQArantineFilterButtonIcon()
+        {
+            return isQArantineFilterEnabled ? IconsDictionary.QArantineIconsDictionary["Filter_Enabled"] : IconsDictionary.QArantineIconsDictionary["Filter_Disabled"];
         }
 
         private void ToggleMeasurements()
@@ -269,46 +306,73 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             IsToggleFileDumpEnabled = !IsToggleFileDumpEnabled;
         }
 
+        private void ToggleQArantineFilter()
+        {
+            IsQArantineFilterEnabled = !IsQArantineFilterEnabled;
+        }
+
+        private void ClearProfilingData()
+        {
+            lock (flagsProfilingDataLock)
+            {
+                FlagsProfilingData.Clear();
+            }
+            lock (memoryDataLock)
+            {
+                MemoryWorkingSetProfilingData.Clear();
+                PrivateMemorySizeProfilingData.Clear();
+            }
+        }
+
         private void OnStatsUpdated(object? sender, ProfilingDataEventArgs eventStats)
         {
             // Memory
-            if (memoryWorkingSetProfilingData.Count >= 10)
+            lock (memoryDataLock)
             {
-                memoryWorkingSetProfilingData.RemoveAt(memoryWorkingSetProfilingData.Count - 1);
+                if (memoryWorkingSetProfilingData.Count >= 10)
+                {
+                    memoryWorkingSetProfilingData.RemoveAt(memoryWorkingSetProfilingData.Count - 1);
+                }
+                memoryWorkingSetProfilingData.Insert(0, eventStats.MemoryWorkingSetSysStats);
             }
-            memoryWorkingSetProfilingData.Insert(0, eventStats.MemoryWorkingSetSysStats);
             RaisePropertyChanged(nameof(MemoryWorkingSetProfilingData));
 
-            if (privateMemorySizeProfilingData.Count >= 10)
+            lock (memoryDataLock)
             {
-                privateMemorySizeProfilingData.RemoveAt(privateMemorySizeProfilingData.Count - 1);
+                if (privateMemorySizeProfilingData.Count >= 10)
+                {
+                    privateMemorySizeProfilingData.RemoveAt(privateMemorySizeProfilingData.Count - 1);
+                }
+                privateMemorySizeProfilingData.Insert(0, eventStats.PrivateMemorySizeSysStats);
             }
-            privateMemorySizeProfilingData.Insert(0, eventStats.PrivateMemorySizeSysStats);
             RaisePropertyChanged(nameof(PrivateMemorySizeProfilingData));
 
             UpdateMemoryChartSeries();
 
             // Flags
-            if (flagsProfilingData.Count >= 10)
-            {
-                flagsProfilingData.RemoveAt(flagsProfilingData.Count - 1);
-            }
-
             lock (flagsProfilingDataLock)
             {
-                Dispatcher.UIThread.InvokeAsync(() =>
+                if (flagsProfilingData.Count >= 10)
+                {
+                    flagsProfilingData.RemoveAt(flagsProfilingData.Count - 1);
+                }
+            }
+
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                lock (flagsProfilingDataLock)
                 {
                     flagsProfilingData.Insert(0, GetGUIFlagStatsListFromSourceFlagStats(eventStats.FlagsStats));
-                    RaisePropertyChanged(nameof(FlagsProfilingData));
-                    UpdateFlagsChartSeries();
-                });
-            }
+                }
+                RaisePropertyChanged(nameof(FlagsProfilingData));
+                UpdateFlagsChartSeries();
+            });
         }
 
         private void UpdateMemoryChartSeries()
         {
-            List<LineSeries<double>> chartSeries = new List<LineSeries<double>>();
-            List<double> chartValues = new List<double>();
+            List<LineSeries<double>> chartSeries = [];
+            List<double> chartValues = [];
 
             foreach (SysStats stat in memoryWorkingSetProfilingData)
             {
@@ -318,7 +382,7 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             chartSeries.Add(new LineSeries<double>
             {
                 Name = "Memory Working Set",
-                Values = chartValues.ToArray(),
+                Values = [.. chartValues],
                 Fill = null,
                 Stroke = new SolidColorPaint(SKColors.LightBlue),
                 GeometryFill = new SolidColorPaint(SKColors.Cyan),
@@ -336,7 +400,7 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             chartSeries.Add(new LineSeries<double>
             {
                 Name = "Private Memory Size",
-                Values = chartValues.ToArray(),
+                Values = [.. chartValues],
                 Fill = null,
                 Stroke = new SolidColorPaint(SKColors.LightGreen),
                 GeometryFill = new SolidColorPaint(SKColors.Green),
@@ -344,23 +408,24 @@ namespace QArantine.Code.QArantineGUI.ViewModels
                 LineSmoothness = 1 
             });
 
-            MemorySeries = chartSeries.ToArray();
+            MemorySeries = [.. chartSeries];
             RaisePropertyChanged(nameof(MemorySeries));
         }
 
         private ObservableCollection<GUIFlagStats> GetGUIFlagStatsListFromSourceFlagStats(List<FlagStats> sourceFlagStats)
         {
-            ObservableCollection<GUIFlagStats> resultList = new ObservableCollection<GUIFlagStats>();
+            ObservableCollection<GUIFlagStats> resultList = [];
             foreach(FlagStats sourceStat in sourceFlagStats)
             {
-                if (!flagColors.ContainsKey(sourceStat.ID))
+                if (!flagColors.TryGetValue(sourceStat.ID, out int[]? value))
                 {
-                    flagColors[sourceStat.ID] = BasicChartColorPalette[flagColors.Count % BasicChartColorPalette.Count];
+                    value = BasicChartColorPalette[flagColors.Count % BasicChartColorPalette.Count];
+                    flagColors[sourceStat.ID] = value;
                 }
 
-                if (string.IsNullOrWhiteSpace(FilterText) || sourceStat.ID.Contains(FilterText, StringComparison.OrdinalIgnoreCase))
+                if ((string.IsNullOrWhiteSpace(FilterText) || sourceStat.ID.Contains(FilterText, StringComparison.OrdinalIgnoreCase)) && (!IsQArantineFilterEnabled || !sourceStat.ID.Contains("QArantine", StringComparison.OrdinalIgnoreCase)))
                 {
-                    int[] brushColor = flagColors[sourceStat.ID];
+                    int[] brushColor = value;
                     resultList.Add(new GUIFlagStats(sourceStat, new SolidColorBrush(new Color(255, (byte)brushColor[0], (byte)brushColor[1], (byte)brushColor[2]))));
                 }
             }
@@ -369,36 +434,45 @@ namespace QArantine.Code.QArantineGUI.ViewModels
 
         private void UpdateFlagsChartSeries()
         {
-            List<StackedColumnSeries<double>> chartSeries = new List<StackedColumnSeries<double>>();
-            Dictionary<string, List<double>> flagsValues = new();
+            List<StackedColumnSeries<double>> chartSeries = [];
+            Dictionary<string, List<double>> flagsValues = [];
 
-            for (int i = 0; i < flagsProfilingData.Count; i++)
+            // Inicializa las listas de valores para cada ID de flag
+            foreach (ObservableCollection<GUIFlagStats> statCollection in flagsProfilingData)
             {
-                foreach (GUIFlagStats stat in flagsProfilingData[i])
+                foreach (GUIFlagStats stat in statCollection)
                 {
-                    if (!flagsValues.ContainsKey(stat.ID)) flagsValues[stat.ID] = new List<double>();
-                    flagsValues[stat.ID].Add(stat.Average);
-
-                    if (!flagColors.ContainsKey(stat.ID))
+                    if (!flagsValues.ContainsKey(stat.ID))
                     {
-                        flagColors[stat.ID] = BasicChartColorPalette[flagColors.Count % BasicChartColorPalette.Count];
+                        flagsValues[stat.ID] = new List<double>(new double[flagsProfilingData.Count]);
                     }
                 }
             }
 
+            // Rellena las listas de valores con los datos actuales
+            for (int i = 0; i < flagsProfilingData.Count; i++)
+            {
+                foreach (GUIFlagStats stat in flagsProfilingData[i])
+                {
+                    flagsValues[stat.ID][i] = stat.Average;
+                }
+            }
+
+            // Crea las series de la gráfica a partir de las listas de valores
             foreach (var kvp in flagsValues.OrderBy(kvp => kvp.Value.Average()))
             {
                 chartSeries.Add(new StackedColumnSeries<double>
                 {
                     Name = $"{kvp.Key}",
-                    Values = kvp.Value.ToArray(),
-                    Fill = new SolidColorPaint(ColorPalettes.GetSKColor(flagColors[kvp.Key]))
+                    Values = [.. kvp.Value],
+                    Fill = new SolidColorPaint(GetSKColor(flagColors[kvp.Key]))
                 });
             }
 
             FlagsSeries = chartSeries.ToArray();
             RaisePropertyChanged(nameof(FlagsSeries));
         }
+
 
         private void RaisePropertyChanged(string propertyName)
         {

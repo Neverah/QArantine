@@ -1,0 +1,60 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="QArantine.Code.QArantineGUI.App"
+             xmlns:local="using:QArantine.Code.QArantineGUI"
+             RequestedThemeVariant="Default">
+             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+  
+    <Application.Styles>
+        <FluentTheme />
+
+        <!-- Global Styles -->
+        <!-- Button -->
+        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="LightGray" />
+        </Style>
+        <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="White" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Height" Value="35" />
+            <Setter Property="Background" Value="#1f1f1f" />
+            <Setter Property="Foreground" Value="LightGray" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Padding" Value="2" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
+        <!-- ComboBox -->
+        <Style Selector="ComboBox:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="LightGray" />
+        </Style>
+        <Style Selector="ComboBox:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="White" />
+        </Style>
+        <Style Selector="ComboBox /template/ Path#DropDownGlyph">
+            <Setter Property="Fill" Value="White" />
+        </Style>
+        <Style Selector="ComboBox:pointerover /template/ Path#DropDownGlyph">
+            <Setter Property="Fill" Value="White" />
+        </Style>
+        <Style Selector="ComboBox">
+            <Setter Property="Height" Value="35" />
+            <Setter Property="Background" Value="#1f1f1f" />
+            <Setter Property="Foreground" Value="LightGray" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Padding" Value="12,8,8,8" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+    </Application.Styles>
+</Application>

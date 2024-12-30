@@ -1,0 +1,98 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:QArantine.Code.QArantineGUI.ViewModels"
+        xmlns:conv="clr-namespace:QArantine.Code.QArantineGUI.Converters"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="500"
+        x:Class="QArantine.Code.QArantineGUI.Views.VarTrackingWindow"
+        x:DataType="vm:VarTrackingWindowViewModel"
+        Icon="/Assets/QArantineGUI/Icons/VarTracking.ico"
+        Title="VarTracking">
+
+    <Design.DataContext>
+        <vm:VarTrackingWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Resources>
+        <conv:ImagePathToBitmapConverter x:Key="ImagePathToBitmapConverter"/>
+    </Window.Resources>
+
+    <Window.Background>
+        <SolidColorBrush Color="Black"/>
+    </Window.Background>
+
+    <DockPanel Margin="10">
+        <Grid DockPanel.Dock="Top">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Button Grid.Column="0" ToolTip.Tip="Toggle Tracking" Command="{Binding ToggleTrackingCommand}" 
+                HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Button.Content>
+                    <Viewbox>
+                        <Image Source="{Binding ToggleTrackingButtonIcon, Converter={StaticResource ImagePathToBitmapConverter}}" RenderOptions.BitmapInterpolationMode="MediumQuality"/>
+                    </Viewbox>
+                </Button.Content>
+            </Button>
+
+            <TextBox Grid.Column="1" Text="{Binding FilterText, Mode=TwoWay}" 
+                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5" Height="35" Width="200" CornerRadius="2" VerticalContentAlignment="Center" TextWrapping="NoWrap"/>
+        </Grid>
+
+        <Grid DockPanel.Dock="Top">
+            <Grid.Styles>
+                <!--ListBox-->
+                <Style Selector="ListBox">
+                    <Setter Property="Background" Value="#111"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Padding" Value="4"/>
+                    <Setter Property="Margin" Value="5"/>
+                </Style>
+                <!--ListBoxItem-->
+                <Style Selector="ListBox ListBoxItem">
+                    <Setter Property="Background" Value="#111"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Padding" Value="2"/>
+                    <Setter Property="Margin" Value="2"/>
+                </Style>
+                <Style Selector="ListBox ListBoxItem:nth-child(2n)">
+                    <Setter Property="Background" Value="#1A1A1A"/>
+                </Style>
+            </Grid.Styles>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <ListBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding VarTrackingData}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="4,0,4,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>                                   
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="{Binding Value}" Grid.Row="0" Grid.Column="1" Foreground="{Binding ColorBrush}" HorizontalAlignment="Left"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </DockPanel>
+</Window>

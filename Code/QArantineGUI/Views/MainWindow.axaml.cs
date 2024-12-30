@@ -3,11 +3,8 @@ using Avalonia.Media;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Platform;
-using Avalonia.VisualTree;
 using Avalonia.Interactivity;
 
-using QArantine.Code.FrameworkModules;
 using QArantine.Code.FrameworkModules.Logs;
 using QArantine.Code.QArantineGUI.Services;
 using QArantine.Code.QArantineGUI.ViewModels;
@@ -33,25 +30,9 @@ namespace QArantine.Code.QArantineGUI.Views
             // Verificar si la aplicación está en modo de aplicación de escritorio
             if (Application.Current != null && Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                // Obtener la pantalla principal
-                var primaryScreen = Screens.All.FirstOrDefault(s => s.IsPrimary);
-
-                if (primaryScreen != null)
-                {
-                    // Obtener el ancho y alto del monitor principal
-                    double screenWidth = primaryScreen.Bounds.Width;
-                    double screenHeight = primaryScreen.Bounds.Height;
-
-                    // Crear un nuevo objeto PixelPoint con las coordenadas para posicionar la ventana
-                    var position = new PixelPoint((int)(screenWidth - this.Width), 0);
-                    
-                    // Establecer las coordenadas para que la ventana se posicione en la esquina superior derecha
-                    this.Position = position;
-                }
-
-                // Asignar función de cambio de valor al ComboBox de DebugLvl
-                var comboBox = this.FindControl<ComboBox>("DebugLvlComboBox");
-                if (comboBox != null) comboBox.SelectionChanged += DebugLvlComboBox_SelectionChanged;
+                // Asignar función de cambio de valor al ComboBox de LogLvl
+                var comboBox = this.FindControl<ComboBox>("LogLvlComboBox");
+                if (comboBox != null) comboBox.SelectionChanged += LogLvlComboBox_SelectionChanged;
             }
         }
 
@@ -82,13 +63,13 @@ namespace QArantine.Code.QArantineGUI.Views
             }
         }
 
-        private void DebugLvlComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        private void LogLvlComboBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
                 if (sender is ComboBox comboBox && comboBox.SelectedItem != null)
                 {
-                    viewModel.DebugLvlButtonBorderColor = new SolidColorBrush(Color.Parse(GUILogHandler.LogColorConsoleWindowMap[viewModel.SelectedLogLvl]));
+                    viewModel.LogLvlButtonForegroundColor = new SolidColorBrush(Color.Parse(GUILogHandler.LogColorConsoleWindowMap[viewModel.SelectedLogLvl]));
                 }
             }
         }

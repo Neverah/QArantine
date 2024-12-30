@@ -1,5 +1,6 @@
 using Avalonia.Media;
 using QArantine.Code.FrameworkModules.Profiling;
+using QArantine.Code.QArantineGUI.StaticData;
 
 namespace QArantine.Code.QArantineGUI.Models
 {
@@ -21,7 +22,7 @@ namespace QArantine.Code.QArantineGUI.Models
             Min = min;
             Sum = sum;
             Count = count;
-            ColorBrush = ColorPalettes.GetBrush(new int[] {256, 256, 256});
+            ColorBrush = ColorPalettes.GetBrush([256, 256, 256]);
         }
 
         public GUIFlagStats (string id, double average, double max, double min, double sum, int count, IBrush colorBrush)
@@ -43,7 +44,7 @@ namespace QArantine.Code.QArantineGUI.Models
             Min = flagStats.Min;
             Sum = flagStats.Sum;
             Count = flagStats.Count;
-            ColorBrush = ColorPalettes.GetBrush(new int[] {256, 256, 256});
+            ColorBrush = ColorPalettes.GetBrush([256, 256, 256]);
         }
 
         public GUIFlagStats (FlagStats flagStats, IBrush colorBrush)

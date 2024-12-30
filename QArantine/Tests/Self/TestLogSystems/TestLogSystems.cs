@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using QArantine.Code.Test;
 using QArantine.Code.FrameworkModules;
 using QArantine.Code.FrameworkModules.GUI;
-using QArantine.Code.QArantineGUI.ViewModels;
+using QArantine.Code.QArantineGUI.Models;
 
 namespace QArantine.Tests
 {
@@ -68,7 +68,7 @@ namespace QArantine.Tests
 
                         List<string> fileLogLines = new(GetFileLogLines());
                         List<string> errorsFileLogLines = new(GetErrorsFileLogLines());
-                        ObservableCollection<LogLine> guiLogLines = new(GetGUILogLines());
+                        ObservableCollection<GUILogLine> guiLogLines = new(GetGUILogLines());
                         int expectedPrints = CurrentCaseInitExpectedPrints;
 
                         foreach (LogManager.LogLevel lvl in Enum.GetValues(typeof(LogManager.LogLevel)))
@@ -151,7 +151,7 @@ namespace QArantine.Tests
             }
         }
 
-        private void CheckPrintCountInTheLogConsoleIsTheExpected(ObservableCollection<LogLine> logLines, string linePattern, LogManager.LogLevel lvl, int expectedCount)
+        private void CheckPrintCountInTheLogConsoleIsTheExpected(ObservableCollection<GUILogLine> logLines, string linePattern, LogManager.LogLevel lvl, int expectedCount)
         {
             Regex regex = new Regex(linePattern);
             int printCount = logLines.Count(logLine => regex.IsMatch(logLine.ToString()));
@@ -181,7 +181,7 @@ namespace QArantine.Tests
             return ReadLogFile(LogManager.fileLogHandler.ErrorsLogPath);
         }
 
-        private ObservableCollection<LogLine> GetGUILogLines()
+        private ObservableCollection<GUILogLine> GetGUILogLines()
         {
             return GUIManager.Instance!.AvaloniaMainWindowViewModel!.LogLines;
         }

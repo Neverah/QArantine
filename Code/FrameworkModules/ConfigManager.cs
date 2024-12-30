@@ -11,7 +11,7 @@ namespace QArantine.Code.FrameworkModules
 
         static ConfigManager()
         {
-            ConfigParams = new();
+            ConfigParams = [];
             LoadQArantineMainConfig();
         }
 

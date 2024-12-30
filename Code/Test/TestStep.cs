@@ -1,10 +1,7 @@
-using System.Collections.Generic;
-
 namespace QArantine.Code
 {
     namespace Test
     {
-        using QArantine.Code.FrameworkModules;
         public class TestStep
         {
             public TestCase ParentTestCase { get; private set;}
@@ -17,7 +14,7 @@ namespace QArantine.Code
                 ParentTestCase = parentTestCase;
                 this.ID = ID;
                 this.stepNum = stepNum;
-                StepFieldsList = new();
+                StepFieldsList = [];
             }
 
             public TestStep AddField((string, object) newField)

@@ -4,6 +4,6 @@ obj/
 
 # Framework output
 **/TestsOutput/**
-**\TestsOutput\**
 *Log.html
-LaunchTestExample.cs
+*GUIWindowSettings.json
+*ProfMeasurements*.json

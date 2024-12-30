@@ -1,25 +1,24 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.VisualTree;
 
 using QArantine.Code.FrameworkModules;
+using QArantine.Code.FrameworkModules.Logs;
 using QArantine.Code.FrameworkModules.GUI;
 using QArantine.Code.FrameworkModules.GUI.Logs;
 using QArantine.Code.QArantineGUI.Views;
+using QArantine.Code.QArantineGUI.Models;
+using QArantine.Code.QArantineGUI.StaticData;
 
 namespace QArantine.Code.QArantineGUI.ViewModels
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        private ObservableCollection<LogLine> _logLines;
+        private ObservableCollection<GUILogLine> _logLines;
         private LogBuffer tfLogBuffer;
         private ScrollViewer? _logScrollViewer;
 
@@ -30,10 +29,20 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             {
                 LogManager.LogLvl = value;
                 RaisePropertyChanged(nameof(SelectedLogLvl));
-                LogOK($"Log level changed to: {SelectedLogLvl.ToString()}");
+                LogOK($"Log level changed to: {SelectedLogLvl}");
             }
         }
-        public List<string> AvailableDebugLvls { get; }
+        public List<string> AvailableLogLvls { get; }
+        private IBrush _logLvlButtonForegroundColor = Brushes.White;
+        public IBrush LogLvlButtonForegroundColor
+        {
+            get { return _logLvlButtonForegroundColor; }
+            set
+            {
+                _logLvlButtonForegroundColor = value;
+                RaisePropertyChanged(nameof(LogLvlButtonForegroundColor));
+            }
+        }
 
         private bool _isAutoScrollEnabled = true;
         public bool IsAutoScrollEnabled
@@ -45,7 +54,7 @@ namespace QArantine.Code.QArantineGUI.ViewModels
                 {
                     _isAutoScrollEnabled = value;
                     RaisePropertyChanged(nameof(IsAutoScrollEnabled));
-                    AutoScrollButtonBorderColor = IsAutoScrollEnabled ? Brushes.White : new SolidColorBrush(Color.Parse("#B44141"));
+                    AutoScrollButtonIcon = IsAutoScrollEnabled ? IconsDictionary.QArantineIconsDictionary["AutoScroll_Enabled"] : IconsDictionary.QArantineIconsDictionary["AutoScroll_Disabled"];
                     if (_isAutoScrollEnabled)
                     {
                         ScrollToBottom();
@@ -54,34 +63,25 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             }
         }
 
-        private IBrush _debugLvlButtonBorderColor = Brushes.White;
-        public IBrush DebugLvlButtonBorderColor
+        private string _autoScrollButtonIcon = IconsDictionary.QArantineIconsDictionary["No_Image"];
+        public string AutoScrollButtonIcon
         {
-            get { return _debugLvlButtonBorderColor; }
+            get { return _autoScrollButtonIcon; }
             set
             {
-                _debugLvlButtonBorderColor = value;
-                RaisePropertyChanged(nameof(DebugLvlButtonBorderColor));
-            }
-        }
-
-        private IBrush _autoScrollButtonBorderColor = Brushes.White;
-        public IBrush AutoScrollButtonBorderColor
-        {
-            get { return _autoScrollButtonBorderColor; }
-            set
-            {
-                _autoScrollButtonBorderColor = value;
-                RaisePropertyChanged(nameof(AutoScrollButtonBorderColor));
+                _autoScrollButtonIcon = value;
+                RaisePropertyChanged(nameof(AutoScrollButtonIcon));
             }
         }
 
         public ICommand ToggleAutoScrollCommand { get; }
         public ICommand ClearLogScrollCommand { get; }
+        public ICommand OpenVarTrackingCommand { get; }
         public ICommand OpenProfilingCommand { get; }
+        private VarTrackingWindow? varTrackingWindow;
         private ProfilingWindow? profilingWindow;
         public event PropertyChangedEventHandler? PropertyChanged;
-        public ObservableCollection<LogLine> LogLines
+        public ObservableCollection<GUILogLine> LogLines
         {
             get { return _logLines; }
             set
@@ -93,10 +93,13 @@ namespace QArantine.Code.QArantineGUI.ViewModels
 
         public MainWindowViewModel()
         {
-            AvailableDebugLvls = Enum.GetValues(typeof(LogManager.LogLevel)).Cast<LogManager.LogLevel>().Select(e => e.ToString()).ToList();
+            AvailableLogLvls = Enum.GetValues(typeof(LogManager.LogLevel)).Cast<LogManager.LogLevel>().Select(e => e.ToString()).ToList();
+            LogLvlButtonForegroundColor = new SolidColorBrush(Color.Parse(GUILogHandler.LogColorConsoleWindowMap[SelectedLogLvl]));
+            AutoScrollButtonIcon = IsAutoScrollEnabled ? IconsDictionary.QArantineIconsDictionary["AutoScroll_Enabled"] : IconsDictionary.QArantineIconsDictionary["AutoScroll_Disabled"];
 
             ClearLogScrollCommand = new RelayCommand(ClearLogLines);
             ToggleAutoScrollCommand = new RelayCommand(ToggleAutoScroll);
+            OpenVarTrackingCommand = new RelayCommand(OpenVarTrackingWindow);
             OpenProfilingCommand = new RelayCommand(OpenProfilingWindow);
             // Se añade la referencia a esta ventana en el GUIManager
             GUIManager.Instance.AvaloniaMainWindowViewModel = this;
@@ -104,7 +107,7 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             tfLogBuffer = GUIManager.Instance.GUILogBuffer;
             SuscribeToTFLogBuffer(tfLogBuffer);
 
-            _logLines = new ObservableCollection<LogLine>();
+            _logLines = [];
             LogBuffer_LogLinesAdded(null, EventArgs.Empty);
         }
 
@@ -117,6 +120,20 @@ namespace QArantine.Code.QArantineGUI.ViewModels
         private void ToggleAutoScroll()
         {
             IsAutoScrollEnabled = !IsAutoScrollEnabled;
+        }
+
+        private void OpenVarTrackingWindow()
+        {
+            if (varTrackingWindow == null)
+            {
+                varTrackingWindow = new VarTrackingWindow();
+                varTrackingWindow.Closed += (sender, e) => varTrackingWindow = null;
+                varTrackingWindow.Show();
+            }
+            else
+            {
+                varTrackingWindow.Activate();
+            }
         }
 
         private void OpenProfilingWindow()
@@ -181,104 +198,24 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             _logScrollViewer = scrollViewer;
         }
 
-        private LogLine GetFinalLogLineFromBufferLogLine(BufferLogLine bufferLogLine)
+        private GUILogLine GetFinalLogLineFromBufferLogLine(BufferLogLine bufferLogLine)
         {
-            return new LogLine(bufferLogLine.Timestamp, bufferLogLine.TimestampForegroundHexCode, bufferLogLine.TestTag, bufferLogLine.TestTagForegroundHexCode, bufferLogLine.LogBody, bufferLogLine.LogBodyForegroundHexCode);
+            return new GUILogLine(bufferLogLine.Timestamp, bufferLogLine.TimestampForegroundHexCode, bufferLogLine.TestTag, bufferLogLine.TestTagForegroundHexCode, bufferLogLine.LogBody, bufferLogLine.LogBodyForegroundHexCode);
         }
 
-        public void AddLogLine(LogLine logLine)
+        public void AddLogLine(GUILogLine logLine)
         {
             LogLines.Add(logLine);
         }
 
         public void AddLogLine(string timestamp, IBrush timestampForeground, string testTag, IBrush testTagForeground, string logBody, IBrush logBodyForeground)
         {
-            LogLines.Add(new LogLine(timestamp, timestampForeground, testTag, testTagForeground, logBody, logBodyForeground ));
+            LogLines.Add(new GUILogLine(timestamp, timestampForeground, testTag, testTagForeground, logBody, logBodyForeground ));
         }
 
         public void AddLogLine(string timestamp, string timestampForegroundHexCode, string testTag, string testTagForegroundHexCode, string logBody, string logBodyForegroundHexCode)
         {
-            LogLines.Add(new LogLine(timestamp, timestampForegroundHexCode, testTag, testTagForegroundHexCode, logBody, logBodyForegroundHexCode));
-        }
-    }
-
-    public class LogLine : INotifyPropertyChanged
-    {
-        private string _timestamp;
-        private IBrush _timestampForeground;
-        private string _testTag;
-        private IBrush _testTagForeground;
-        private string _logBody;
-        private IBrush _logBodyForeground;
-
-        public string Timestamp
-        {
-            get { return _timestamp; }
-            set  { _timestamp = value; }
-        }
-
-        public IBrush TimestampForeground
-        {
-            get { return _timestampForeground; }
-            set { _timestampForeground = value; }
-        }
-
-        public string TestTag
-        {
-            get { return _testTag; }
-            set { _testTag = value; }
-        }
-
-        public IBrush TestTagForeground
-        {
-            get { return _testTagForeground; }
-            set {  _testTagForeground = value; }
-        }
-
-        public string LogBody
-        {
-            get { return _logBody; }
-            set { _logBody = value; }
-        }
-
-        public IBrush LogBodyForeground
-        {
-            get { return _logBodyForeground; }
-            set { _logBodyForeground = value; }
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public LogLine(string timestamp, IBrush timestampForeground, string testTag, IBrush testTagForeground, string logBody, IBrush logBodyForeground)
-        {
-            _timestamp = timestamp ?? "!NullTextFound!";
-            _timestampForeground = timestampForeground ?? Brushes.Blue;
-            _testTag = testTag ?? "!NullTextFound!";
-            _testTagForeground = testTagForeground ?? Brushes.Blue;
-            _logBody = logBody ?? "!NullTextFound!";
-            _logBodyForeground = logBodyForeground ?? Brushes.Blue;
-            RaisePropertyChanged("");
-        }
-
-        public LogLine(string timestamp, string timestampForegroundHexCode, string testTag, string testTagForegroundHexCode, string logBody, string logBodyForegroundHexCode)
-        {
-            _timestamp = timestamp ?? "!NullTextFound!";
-            _timestampForeground = !string.IsNullOrEmpty(timestampForegroundHexCode) ? new SolidColorBrush(Color.Parse(timestampForegroundHexCode)) : Brushes.Blue;
-            _testTag = testTag ?? "!NullTextFound!";
-            _testTagForeground = !string.IsNullOrEmpty(testTagForegroundHexCode) ? new SolidColorBrush(Color.Parse(testTagForegroundHexCode)) : Brushes.Blue;
-            _logBody = logBody ?? "!NullTextFound!";
-            _logBodyForeground = !string.IsNullOrEmpty(logBodyForegroundHexCode) ? new SolidColorBrush(Color.Parse(logBodyForegroundHexCode)) : Brushes.Blue;
-            RaisePropertyChanged("");
-        }
-
-        private void RaisePropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public override string ToString()
-        {
-            return _timestamp + " " + _testTag + " " + _logBody;
+            LogLines.Add(new GUILogLine(timestamp, timestampForegroundHexCode, testTag, testTagForegroundHexCode, logBody, logBodyForegroundHexCode));
         }
     }
 }

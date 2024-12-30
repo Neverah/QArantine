@@ -1,8 +1,3 @@
-using System;
-using System.Threading;
-using Avalonia.Threading;
-using System.Collections.Generic;
-
 using QArantine.Code.FrameworkModules.GUI.Logs;
 using QArantine.Code.QArantineGUI;
 using QArantine.Code.QArantineGUI.ViewModels;
@@ -26,11 +21,11 @@ namespace QArantine.Code.FrameworkModules.GUI
             GUILogBuffer = new();
 
             _avaloniaThread = new Thread(
-                () => {
-                    AvaloniaStarter.StartAvaloniaApp();
-                }
-            );
-            _avaloniaThread.IsBackground = true;
+                AvaloniaStarter.StartAvaloniaApp
+            )
+            {
+                IsBackground = true
+            };
         }
 
         public static GUIManager Instance

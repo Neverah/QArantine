@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:QArantine.Code.QArantineGUI.ViewModels"
+        xmlns:conv="clr-namespace:QArantine.Code.QArantineGUI.Converters"
         xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,56 +15,20 @@
         <vm:ProfilingWindowViewModel/>
     </Design.DataContext>
 
+    <Window.Resources>
+        <conv:ImagePathToBitmapConverter x:Key="ImagePathToBitmapConverter"/>
+    </Window.Resources>
+
     <Window.Background>
         <SolidColorBrush Color="Black"/>
     </Window.Background>
 
     <DockPanel Margin="10">
         <Grid DockPanel.Dock="Top">
-            <Grid.Styles>
-                <!--Button-->
-                <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                    <Setter Property="Background" Value="LightGray" />
-                </Style>
-                <Style Selector="Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                    <Setter Property="Background" Value="White" />
-                </Style>
-                <Style Selector="Button">
-                    <Setter Property="Height" Value="35" />
-                    <Setter Property="Background" Value="Gray" />
-                    <Setter Property="Foreground" Value="Black" />
-                    <Setter Property="Margin" Value="5" />
-                    <Setter Property="Padding" Value="8" />
-                    <Setter Property="FontSize" Value="12" />
-                    <Setter Property="FontWeight" Value="Bold" />
-                    <Setter Property="BorderThickness" Value="2" />
-                    <Setter Property="BorderBrush" Value="White" />
-                    <Setter Property="CornerRadius" Value="2" />
-                    <Setter Property="VerticalContentAlignment" Value="Center" />
-                </Style>
-                <!--ComboBox-->
-                <Style Selector="ComboBox:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                    <Setter Property="Background" Value="LightGray" />
-                </Style>
-                <Style Selector="ComboBox:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                    <Setter Property="Background" Value="White" />
-                </Style>
-                <Style Selector="ComboBox">
-                    <Setter Property="Height" Value="35" />
-                    <Setter Property="Background" Value="Gray" />
-                    <Setter Property="Foreground" Value="Black" />
-                    <Setter Property="Margin" Value="5" />
-                    <Setter Property="Padding" Value="8" />
-                    <Setter Property="FontSize" Value="12" />
-                    <Setter Property="FontWeight" Value="Bold" />
-                    <Setter Property="BorderThickness" Value="2" />
-                    <Setter Property="BorderBrush" Value="White" />
-                    <Setter Property="CornerRadius" Value="2" />
-                    <Setter Property="VerticalContentAlignment" Value="Center" />
-                </Style>
-            </Grid.Styles>
 
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -74,18 +39,44 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Button Grid.Column="0" Content="Toggle Measurements" Command="{Binding ToggleMeasurementsCommand}" 
-                HorizontalAlignment="Left" VerticalAlignment="Top"
-                BorderBrush="{Binding ToggleMeasurementsButtonBorderColor}">
+            <Button Grid.Column="0" ToolTip.Tip="Toggle Measurements" Command="{Binding ToggleMeasurementsCommand}" 
+                HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Button.Content>
+                    <Viewbox>
+                        <Image Source="{Binding ToggleMeasurementsButtonIcon, Converter={StaticResource ImagePathToBitmapConverter}}" RenderOptions.BitmapInterpolationMode="MediumQuality"/>
+                    </Viewbox>
+                </Button.Content>
             </Button>
 
-            <Button Grid.Column="1" Content="Toggle File Dump" Command="{Binding ToggleFileDumpCommand}" 
-                HorizontalAlignment="Left" VerticalAlignment="Top"
-                BorderBrush="{Binding ToggleFileDumpButtonBorderColor}">
+            <Button Grid.Column="1" ToolTip.Tip="Toggle File Dump" Command="{Binding ToggleFileDumpCommand}" 
+                HorizontalAlignment="Left" VerticalAlignment="Top" Padding="4">
+                <Button.Content>
+                    <Viewbox>
+                        <Image Source="{Binding ToggleFileDumpButtonIcon, Converter={StaticResource ImagePathToBitmapConverter}}" RenderOptions.BitmapInterpolationMode="MediumQuality"/>
+                    </Viewbox>
+                </Button.Content>
             </Button>
 
-            <TextBox Grid.Column="2" Text="{Binding FilterText, Mode=TwoWay}" 
+            <Button Grid.Column="2" ToolTip.Tip="Clear Profiling Data" Command="{Binding ClearProfilingDataCommand}" 
+                HorizontalAlignment="Left" VerticalAlignment="Top" Padding="4">
+                <Button.Content>
+                    <Viewbox>
+                        <Image Source="/Assets/QArantineGUI/Icons/Clear.png" RenderOptions.BitmapInterpolationMode="MediumQuality"/>
+                    </Viewbox>
+                </Button.Content>
+            </Button>
+
+            <TextBox Grid.Column="3" Text="{Binding FilterText, Mode=TwoWay}" 
                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5" Height="35" Width="200" CornerRadius="2" VerticalContentAlignment="Center" TextWrapping="NoWrap"/>
+
+            <Button Grid.Column="4" ToolTip.Tip="Toggle QArantine Flags Filter" Command="{Binding ToggleQArantineFilterCommand}" 
+                HorizontalAlignment="Left" VerticalAlignment="Top" Padding="4">
+                <Button.Content>
+                    <Viewbox>
+                        <Image Source="{Binding ToggleQArantineFilterButtonIcon, Converter={StaticResource ImagePathToBitmapConverter}}" RenderOptions.BitmapInterpolationMode="MediumQuality"/>
+                    </Viewbox>
+                </Button.Content>
+            </Button>
         </Grid>
 
         <Grid DockPanel.Dock="Top">

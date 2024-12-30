@@ -1,7 +1,7 @@
 using SkiaSharp;
 using Avalonia.Media;
 
-namespace QArantine.Code.QArantineGUI.Models
+namespace QArantine.Code.QArantineGUI.StaticData
 {
     public static class ColorPalettes
     {
@@ -13,7 +13,7 @@ namespace QArantine.Code.QArantineGUI.Models
             new [] {153, 102, 255},
             new [] {75, 192, 192},
             new [] {255, 159, 64},
-            new [] {64, 224, 208},
+            new [] {193, 203, 208},
             new [] {0, 255, 127},
             new [] {240, 128, 128},
             new [] {173, 216, 230},
