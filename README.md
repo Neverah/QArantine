@@ -13,4 +13,4 @@ Performance profiler:
 
 Among other functionalities implemented so far, such as:
 - A TestFramework to develop automatic tests to test the game autonomously.
-- A multi-project Launcher to make and test builds, and visualize the outputs.
+- A multi-project [Launcher](https://github.com/Neverah/QArantineLauncher) to make and test builds, and visualize the outputs.
