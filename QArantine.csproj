@@ -8,6 +8,8 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>Code/app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+
+    <!--DefineConstants>DISABLE_QARANTINE</DefineConstants--> <!--Uncomment this line to disable QArantine extensions-->
   </PropertyGroup>
 
   <ItemGroup>
