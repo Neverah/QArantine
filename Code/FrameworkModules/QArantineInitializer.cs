@@ -29,6 +29,7 @@ namespace QArantine.Code.FrameworkModules
 
         public void QArantineInit(string? testClassToRun = null, string? testClassAssemblyName = null)
         {
+#if !DISABLE_QARANTINE
             CommonInit();
 
             if (testClassToRun == null)
@@ -41,10 +42,14 @@ namespace QArantine.Code.FrameworkModules
                 TestManager.Instance.LaunchTest(testClassToRun, testClassAssemblyName ?? GetCallingAssemblyName() ?? typeof(QArantine.Code.FrameworkModules.TestManager).Assembly.GetName().Name ?? "QArantine");
                 #pragma warning restore CS4014
             }
+#else
+            Console.WriteLine("The DISABLE_QARANTINE const is set to true, QArantine will not be initialized");
+#endif
         }
 
         public async Task QArantineInitAndAwait(string? testClassToRun = null, string? testClassAssemblyName = null)
         {
+#if !DISABLE_QARANTINE
             CommonInit();
 
             if (testClassToRun == null)
@@ -55,6 +60,9 @@ namespace QArantine.Code.FrameworkModules
             {
                 await TestManager.Instance.LaunchTest(testClassToRun, testClassAssemblyName ?? GetCallingAssemblyName() ?? typeof(QArantine.Code.FrameworkModules.TestManager).Assembly.GetName().Name ?? "QArantine");
             }
+#else
+            Console.WriteLine("The DISABLE_QARANTINE const is set to true, QArantine will not be initialized");
+#endif
         }
 
         private static string? GetCallingAssemblyName()
