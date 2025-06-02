@@ -1,10 +1,7 @@
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Reflection;
 
 using QArantine.Code.Test;
+using System.Diagnostics.CodeAnalysis;
 
 namespace QArantine.Code.FrameworkModules
 {
@@ -108,7 +105,7 @@ namespace QArantine.Code.FrameworkModules
             return testAssembly;
         }
 
-        private static QArantineTest? GetTestInstance(Type testClass)
+        private static QArantineTest? GetTestInstance([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type testClass)
         {
             QArantineTest? testInstance = (QArantineTest?)Activator.CreateInstance(testClass);
             if (testInstance == null)

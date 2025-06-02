@@ -5,6 +5,7 @@ using QArantine.Code.Test;
 using QArantine.Code.FrameworkModules;
 using QArantine.Code.FrameworkModules.GUI;
 using QArantine.Code.QArantineGUI.Models;
+using QArantine.Code.QArantineGUI.DataStructures;
 
 namespace QArantine.Tests
 {
@@ -115,7 +116,7 @@ namespace QArantine.Tests
 
         protected override void PreLaunchChecks()
         {
-            while(GUIManager.Instance!.AvaloniaMainWindowViewModel == null || GUIManager.Instance!.AvaloniaMainWindowViewModel.LogLines == null)
+            while(GUIManager.Instance.GetMainWindowViewModel?.Invoke() == null || GUIManager.Instance.GetMainWindowViewModel?.Invoke()?.LogLines == null)
             {
                 Thread.Sleep(1000);
             }
@@ -153,7 +154,7 @@ namespace QArantine.Tests
 
         private void CheckPrintCountInTheLogConsoleIsTheExpected(ObservableCollection<GUILogLine> logLines, string linePattern, LogManager.LogLevel lvl, int expectedCount)
         {
-            Regex regex = new Regex(linePattern);
+            Regex regex = new(linePattern);
             int printCount = logLines.Count(logLine => regex.IsMatch(logLine.ToString()));
 
             if(printCount != expectedCount)
@@ -181,14 +182,14 @@ namespace QArantine.Tests
             return ReadLogFile(LogManager.fileLogHandler.ErrorsLogPath);
         }
 
-        private ObservableCollection<GUILogLine> GetGUILogLines()
+        private ObservableCircularBuffer<GUILogLine> GetGUILogLines()
         {
-            return GUIManager.Instance!.AvaloniaMainWindowViewModel!.LogLines;
+            return GUIManager.Instance.GetMainWindowViewModel!.Invoke()!.LogLines;
         }
 
         private List<string> ReadLogFile(string filePath)
         {
-            List<string> lines = new List<string>();
+            List<string> lines = [];
             try
             {
                 using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))

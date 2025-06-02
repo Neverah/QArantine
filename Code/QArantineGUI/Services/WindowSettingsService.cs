@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
 using Avalonia;
 using Avalonia.Controls;
 
+using QArantine.Code.JsonContexts;
 using QArantine.Code.QArantineGUI.Models;
 
 namespace QArantine.Code.QArantineGUI.Services
@@ -14,14 +11,14 @@ namespace QArantine.Code.QArantineGUI.Services
     {
         private const string SettingsFile = "QArantine/Config/GUIWindowSettings.json";
 
-        public void LoadWindowSize(Window? window)
+        public static void LoadWindowSize(Window? window)
         {
-            if (window == null) throw new ArgumentNullException(nameof(window));
+            ArgumentNullException.ThrowIfNull(window, nameof(window));
 
             if (File.Exists(SettingsFile))
             {
                 var json = File.ReadAllText(SettingsFile);
-                var settingsList = JsonSerializer.Deserialize<List<WindowSettings>>(json);
+                var settingsList = JsonSerializer.Deserialize(json, WindowSettingsJsonContext.Default.ListWindowSettings);
                 var settings = settingsList?.FirstOrDefault(s => s.WindowTitle == window.Title);
                 if (settings != null)
                 {
@@ -31,24 +28,45 @@ namespace QArantine.Code.QArantineGUI.Services
                     return;
                 }
             }
-            // Default case
-            window.Width = 800;
-            window.Height = 900;
         }
 
-        public void SaveWindowSizeAndPos(Window? window)
+        public static void SaveWindowSizeAndPos(Window? window)
         {
-            if (window == null) throw new ArgumentNullException(nameof(window));
+            ArgumentNullException.ThrowIfNull(window, nameof(window));
+
+            var screens = window.Screens.All;
+            bool isPositionValid = false;
+            int finalPosX, finalPosY;
+
+            foreach (var screen in screens)
+            {
+                var screenBounds = screen.Bounds;
+                if (screenBounds.Contains(window.Position))
+                {
+                    isPositionValid = true;
+                    break;
+                }
+            }
+            if (isPositionValid)
+            {
+                finalPosX = window.Position.X;
+                finalPosY = window.Position.Y;
+            }
+            else
+            {
+                finalPosX = 0;
+                finalPosY = 0;
+            }
 
             List<WindowSettings> settingsList;
             if (File.Exists(SettingsFile))
             {
                 var json = File.ReadAllText(SettingsFile);
-                settingsList = JsonSerializer.Deserialize<List<WindowSettings>>(json) ?? new List<WindowSettings>();
+                settingsList = JsonSerializer.Deserialize(json, WindowSettingsJsonContext.Default.ListWindowSettings) ?? [];
             }
             else
             {
-                settingsList = new List<WindowSettings>();
+                settingsList = [];
             }
 
             var existingSettings = settingsList.FirstOrDefault(s => s.WindowTitle == window.Title);
@@ -56,16 +74,20 @@ namespace QArantine.Code.QArantineGUI.Services
             {
                 existingSettings.Width = window.Width;
                 existingSettings.Height = window.Height;
-                existingSettings.PosX = window.Position.X;
-                existingSettings.PosY = window.Position.Y;
+                existingSettings.PosX = finalPosX;
+                existingSettings.PosY = finalPosY;
             }
             else
             {
-                var settings = new WindowSettings(window.Title!, window.Width, window.Height, window.Position.X, window.Position.Y);
+                var settings = new WindowSettings(window.Title!, window.Width, window.Height, finalPosX, finalPosY);
                 settingsList.Add(settings);
             }
 
-            var updatedJson = JsonSerializer.Serialize(settingsList, new JsonSerializerOptions { WriteIndented = true });
+            var updatedJson = JsonSerializer.Serialize(settingsList, WindowSettingsJsonContext.Default.ListWindowSettings);
+
+            string? directoryPath = Path.GetDirectoryName(SettingsFile);
+            if (directoryPath != null) Directory.CreateDirectory(directoryPath);
+
             File.WriteAllText(SettingsFile, updatedJson);
         }
     }

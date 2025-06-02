@@ -6,11 +6,11 @@ namespace QArantine.Code.FrameworkModules.GUI
 {
     public sealed class GUIManager
     {
-        private static readonly GUIManager instance = new GUIManager();
+        private static readonly GUIManager instance = new();
         private Thread? _avaloniaThread;
 
         public LogBuffer GUILogBuffer { get; set; }
-        public MainWindowViewModel? AvaloniaMainWindowViewModel { get; set; }
+        public Func<MainWindowViewModel?>? GetMainWindowViewModel { get; set; }
 
         // Constructor estático y constructor privado para aplicar el Singleton
         static GUIManager()

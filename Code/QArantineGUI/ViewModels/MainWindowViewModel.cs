@@ -13,12 +13,15 @@ using QArantine.Code.FrameworkModules.GUI.Logs;
 using QArantine.Code.QArantineGUI.Views;
 using QArantine.Code.QArantineGUI.Models;
 using QArantine.Code.QArantineGUI.StaticData;
+using QArantine.Code.QArantineGUI.DataStructures;
 
 namespace QArantine.Code.QArantineGUI.ViewModels
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        private ObservableCollection<GUILogLine> _logLines;
+        private const int MaxLogLines = 2048;
+
+        private ObservableCircularBuffer<GUILogLine> _logLines;
         private LogBuffer tfLogBuffer;
         private ScrollViewer? _logScrollViewer;
 
@@ -78,10 +81,12 @@ namespace QArantine.Code.QArantineGUI.ViewModels
         public ICommand ClearLogScrollCommand { get; }
         public ICommand OpenVarTrackingCommand { get; }
         public ICommand OpenProfilingCommand { get; }
+        public ICommand OpenInputSimulationCommand { get; }
         private VarTrackingWindow? varTrackingWindow;
         private ProfilingWindow? profilingWindow;
+        private InputSimulationWindow? inputSimulationWindow;
         public event PropertyChangedEventHandler? PropertyChanged;
-        public ObservableCollection<GUILogLine> LogLines
+        public ObservableCircularBuffer<GUILogLine> LogLines
         {
             get { return _logLines; }
             set
@@ -101,13 +106,14 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             ToggleAutoScrollCommand = new RelayCommand(ToggleAutoScroll);
             OpenVarTrackingCommand = new RelayCommand(OpenVarTrackingWindow);
             OpenProfilingCommand = new RelayCommand(OpenProfilingWindow);
+            OpenInputSimulationCommand = new RelayCommand(OpenInputSimulationWindow);
             // Se añade la referencia a esta ventana en el GUIManager
-            GUIManager.Instance.AvaloniaMainWindowViewModel = this;
+            GUIManager.Instance.GetMainWindowViewModel = () => this;
             // Se obtiene la referencia al buffer de Logs del TF
             tfLogBuffer = GUIManager.Instance.GUILogBuffer;
             SuscribeToTFLogBuffer(tfLogBuffer);
 
-            _logLines = [];
+            _logLines = new(MaxLogLines);
             LogBuffer_LogLinesAdded(null, EventArgs.Empty);
         }
 
@@ -150,6 +156,20 @@ namespace QArantine.Code.QArantineGUI.ViewModels
             }
         }
 
+        private void OpenInputSimulationWindow()
+        {
+            if (inputSimulationWindow == null)
+            {
+                inputSimulationWindow = new InputSimulationWindow();
+                inputSimulationWindow.Closed += (sender, e) => inputSimulationWindow = null;
+                inputSimulationWindow.Show();
+            }
+            else
+            {
+                inputSimulationWindow.Activate();
+            }
+        }
+
         private void RaisePropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -185,10 +205,8 @@ namespace QArantine.Code.QArantineGUI.ViewModels
 
         private void ScrollToBottom()
         {
-            // Verificar si el ScrollViewer está disponible
             if (_isAutoScrollEnabled && _logScrollViewer != null)
             {
-                // Realizar autoscroll
                 _logScrollViewer.Offset = new Vector(_logScrollViewer.Offset.X, _logScrollViewer.Extent.Height);
             }
         }
@@ -210,12 +228,12 @@ namespace QArantine.Code.QArantineGUI.ViewModels
 
         public void AddLogLine(string timestamp, IBrush timestampForeground, string testTag, IBrush testTagForeground, string logBody, IBrush logBodyForeground)
         {
-            LogLines.Add(new GUILogLine(timestamp, timestampForeground, testTag, testTagForeground, logBody, logBodyForeground ));
+            AddLogLine(new GUILogLine(timestamp, timestampForeground, testTag, testTagForeground, logBody, logBodyForeground ));
         }
 
         public void AddLogLine(string timestamp, string timestampForegroundHexCode, string testTag, string testTagForegroundHexCode, string logBody, string logBodyForegroundHexCode)
         {
-            LogLines.Add(new GUILogLine(timestamp, timestampForegroundHexCode, testTag, testTagForegroundHexCode, logBody, logBodyForegroundHexCode));
+            AddLogLine(new GUILogLine(timestamp, timestampForegroundHexCode, testTag, testTagForegroundHexCode, logBody, logBodyForegroundHexCode));
         }
     }
 }

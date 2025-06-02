@@ -6,18 +6,18 @@ using QArantine.Code.QArantineGUI.ViewModels;
 
 namespace QArantine.Code.QArantineGUI.Views
 {
-    public partial class VarTrackingWindow : Window
+    public partial class InputSimulationWindow : Window
     {
-        public VarTrackingWindow()
+        public InputSimulationWindow()
         {
             InitializeComponent();
-            DataContext = new VarTrackingWindowViewModel();
+            DataContext = new InputSimulationWindowViewModel();
 
             WindowSettingsService.LoadWindowSize(this);
 
             // Suscripción a eventos
-            this.Resized += VarTrackingWindow_Resized;
-            this.PositionChanged += VarTrackingWindow_PosChanged;
+            this.Resized += InputSimulationWindow_Resized;
+            this.PositionChanged += InputSimulationWindow_PosChanged;
         }
 
         private void InitializeComponent()
@@ -25,12 +25,12 @@ namespace QArantine.Code.QArantineGUI.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-        private void VarTrackingWindow_Resized(object? sender, EventArgs e)
+        private void InputSimulationWindow_Resized(object? sender, EventArgs e)
         {
             WindowSettingsService.SaveWindowSizeAndPos(this);
         }
 
-        private void VarTrackingWindow_PosChanged(object? sender, EventArgs e)
+        private void InputSimulationWindow_PosChanged(object? sender, EventArgs e)
         {
             WindowSettingsService.SaveWindowSizeAndPos(this);
         }

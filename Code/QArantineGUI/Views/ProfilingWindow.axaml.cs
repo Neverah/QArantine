@@ -9,15 +9,12 @@ namespace QArantine.Code.QArantineGUI.Views
 {
     public partial class ProfilingWindow : Window
     {
-        private readonly WindowSettingsService _windowSettingsService;
-
         public ProfilingWindow()
         {
             InitializeComponent();
             DataContext = new ProfilingWindowViewModel();
 
-            _windowSettingsService = new WindowSettingsService();
-            _windowSettingsService.LoadWindowSize(this);
+            WindowSettingsService.LoadWindowSize(this);
 
             // Suscripción a eventos
             this.Resized += ProfilingWindow_Resized;
@@ -31,12 +28,12 @@ namespace QArantine.Code.QArantineGUI.Views
 
         private void ProfilingWindow_Resized(object? sender, EventArgs e)
         {
-            _windowSettingsService.SaveWindowSizeAndPos(this);
+            WindowSettingsService.SaveWindowSizeAndPos(this);
         }
 
         private void ProfilingWindow_PosChanged(object? sender, EventArgs e)
         {
-            _windowSettingsService.SaveWindowSizeAndPos(this);
+            WindowSettingsService.SaveWindowSizeAndPos(this);
         }
     }
 }

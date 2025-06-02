@@ -31,6 +31,7 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
@@ -77,8 +78,17 @@
                 </Viewbox>
             </Button.Content>
         </Button>
+
+        <Button Grid.Column="6" ToolTip.Tip="ToggleRecordingInput" Command="{Binding OpenInputSimulationCommand}" 
+            HorizontalAlignment="Right" VerticalAlignment="Top" Width="NaN">
+            <Button.Content>
+                <Viewbox>
+                    <Image Source="/Assets/QArantineGUI/Icons/InputSimulation.png" RenderOptions.BitmapInterpolationMode="MediumQuality"/>
+                </Viewbox>
+            </Button.Content>
+        </Button>
                 
-        <ScrollViewer Grid.Row="1" Grid.ColumnSpan="6" x:Name="LogScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="5" Padding="0" Background="#111" >
+        <ScrollViewer Grid.Row="1" Grid.ColumnSpan="7" x:Name="LogScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="5" Padding="0" Background="#111" >
             <ItemsControl ItemsSource="{Binding LogLines}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

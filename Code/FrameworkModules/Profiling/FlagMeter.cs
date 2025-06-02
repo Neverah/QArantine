@@ -1,12 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading;
-
-using QArantine.Code.FrameworkModules;
 
 namespace QArantine.Code.FrameworkModules.Profiling
 {
@@ -38,7 +30,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
             currentReadBuffer = measurementsBuffer2;
         }
 
-        public void StartMeasurement(long? callIndex = null, string? callID = null)
+        public void StartMeasurement(long callIndex = -1, string? callID = null)
         {
             lock (_lock)
             {
@@ -50,7 +42,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
                 isMeasurementOngoing = true;
             }
 
-            currCallIndex = callIndex ?? currCallIndex + 1;
+            currCallIndex = callIndex >= 0 ? callIndex : currCallIndex + 1;
             currInitTimestamp = TimeManager.AppClock.ElapsedTicks * 1000000 / Stopwatch.Frequency;
             currCallID = callID ?? "";
         }

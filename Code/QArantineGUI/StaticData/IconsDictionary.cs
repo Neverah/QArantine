@@ -12,9 +12,13 @@ namespace QArantine.Code.QArantineGUI.StaticData
             {"Start", "/Assets/QArantineGUI/Icons/Start.png"},
             {"Pause", "/Assets/QArantineGUI/Icons/Pause.png"},
             {"Stop", "/Assets/QArantineGUI/Icons/Stop.png"},
+            {"Recording", "/Assets/QArantineGUI/Icons/Recording.png"},
             {"Add", "/Assets/QArantineGUI/Icons/Add.png"},
             {"Delete", "/Assets/QArantineGUI/Icons/Delete.png"},
             {"Configuration", "/Assets/QArantineGUI/Icons/Configuration.png"},
+            {"Refresh", "/Assets/QArantineGUI/Icons/Refresh.png"},
+
+            {"Directory", "/Assets/QArantineGUI/Icons/Directory.png"},
 
             {"Filter_Enabled", "/Assets/QArantineGUI/Icons/Filter_Enabled.png"},
             {"Filter_Disabled", "/Assets/QArantineGUI/Icons/Filter_Disabled.png"},
@@ -27,6 +31,8 @@ namespace QArantine.Code.QArantineGUI.StaticData
             {"ProfMeasurements_Disabled", "/Assets/QArantineGUI/Icons/ProfMeasurements_Disabled.png"},
             {"ProfFileDump_Enabled", "/Assets/QArantineGUI/Icons/ProfFileDump_Enabled.png"},
             {"ProfFileDump_Disabled", "/Assets/QArantineGUI/Icons/ProfFileDump_Disabled.png"},
+
+            {"InputSimulation", "/Assets/QArantineGUI/Icons/InputSimulation.png"},
         };
     }
 }

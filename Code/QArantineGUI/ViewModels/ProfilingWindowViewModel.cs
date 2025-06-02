@@ -142,7 +142,7 @@ namespace QArantine.Code.QArantineGUI.ViewModels
                 new Axis
                 {
                     Name = "Bytes",
-                    Labeler = value => $"{value / 1000000:0.##} MB"
+                    Labeler = value => $"{value / (1024*1024):0.##} MB"
                 }
             ];
             MemoryYSections =
@@ -150,13 +150,13 @@ namespace QArantine.Code.QArantineGUI.ViewModels
                 new() {
                     Yi = 500000000,
                     Yj = 500000000,
-                    Stroke = new SolidColorPaint { StrokeThickness = 3, Color = SKColors.Green.WithAlpha(150), PathEffect = new DashEffect(new float[] { 6, 6 }) },
+                    Stroke = new SolidColorPaint { StrokeThickness = 3, Color = SKColors.Green.WithAlpha(150), PathEffect = new DashEffect([6, 6]) },
                     Label = "1 GB"
                 },
                 new() {
                     Yi = 1000000000,
                     Yj = 1000000000,
-                    Stroke = new SolidColorPaint { StrokeThickness = 3, Color = SKColors.Yellow.WithAlpha(90), PathEffect = new DashEffect(new float[] { 6, 6 }) },
+                    Stroke = new SolidColorPaint { StrokeThickness = 3, Color = SKColors.Yellow.WithAlpha(90), PathEffect = new DashEffect([6, 6]) },
                     Label = "500 MB",
                 }
             ];

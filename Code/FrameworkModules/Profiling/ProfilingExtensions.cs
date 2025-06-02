@@ -2,7 +2,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
 {
     public static class ProfilingExtensions
     {
-        public static void StartProfilerFlagMeasurement(string flagID, string category, long? callIndex = null, string? callID = null)
+        public static void StartProfilerFlagMeasurement(string flagID, string category, long callIndex = -1, string? callID = null)
         {
 #if !DISABLE_QARANTINE
             TFProfiler.Instance.StartFlagMeasurement(flagID, category, callIndex, callID);

@@ -1,7 +1,10 @@
 namespace QArantine.Code.Test
 {
     using System.Text.Json;
+
+    using QArantine.Code.JsonContexts;
     using QArantine.Code.FrameworkModules;
+
     public abstract class QArantineTest
     {
         public enum TestState
@@ -21,9 +24,8 @@ namespace QArantine.Code.Test
         public string TestCaseEndStepID { get; set; }
         protected readonly List<TestCase> TestCasesList;
 
-        private JsonSerializerOptions outputSerializer = new(){ WriteIndented = ConfigManager.GetTFConfigParamAsBool("IndentReportSystemJsonFiles")};
         private CancellationToken TimeoutToken;
-        private readonly Dictionary<string, Func<(String, float)>> FlowChart;
+        private readonly Dictionary<string, Func<(string, float)>> FlowChart;
 
         public QArantineTest()
         {
@@ -215,7 +217,7 @@ namespace QArantine.Code.Test
             );
 
             using StreamWriter errorsWriter = new(TestManager.Instance.GetOutputRootPath() + "/" + Name + "/TestResult.json");
-            errorsWriter.Write(JsonSerializer.Serialize(testResult, outputSerializer));
+            errorsWriter.Write(JsonSerializer.Serialize(testResult, FrameworkTestJsonContext.Default.TestResult));
         }
 
         protected virtual void PrintCoverageToJSONFile()
@@ -230,7 +232,7 @@ namespace QArantine.Code.Test
 
             using (StreamWriter errorsWriter = new(TestManager.Instance.GetOutputRootPath() + "/" + Name + "/Coverage/TestedTestCases.json"))
             {
-                errorsWriter.Write(JsonSerializer.Serialize(testedCasesList, outputSerializer));
+                errorsWriter.Write(JsonSerializer.Serialize(testedCasesList, FrameworkTestJsonContext.Default.ListString));
             }
         }
 
@@ -246,7 +248,7 @@ namespace QArantine.Code.Test
 
             using (StreamWriter errorsWriter = new(TestManager.Instance.GetOutputRootPath() + "/" + Name + "/TestFoundErrors.json"))
             {
-                errorsWriter.Write(JsonSerializer.Serialize(errorsList, outputSerializer));
+                errorsWriter.Write(JsonSerializer.Serialize(errorsList, FrameworkTestJsonContext.Default.ListTestError));
             }
         }
 

@@ -8,24 +8,22 @@ using Avalonia.Interactivity;
 using QArantine.Code.FrameworkModules.Logs;
 using QArantine.Code.QArantineGUI.Services;
 using QArantine.Code.QArantineGUI.ViewModels;
+using QArantine.Code.FrameworkModules;
 
 namespace QArantine.Code.QArantineGUI.Views
 {
     public partial class MainWindow : Window
     {
-        private readonly WindowSettingsService _windowSettingsService;
-
         public MainWindow()
         {
             InitializeComponent();
 
-            _windowSettingsService = new WindowSettingsService();
-            _windowSettingsService.LoadWindowSize(this);
+            WindowSettingsService.LoadWindowSize(this);
 
             // Suscripción a eventos
-            this.Resized += MainWindow_Resized;
-            this.PositionChanged += MainWindow_PosChanged;
-            this.Loaded += MainWindow_Loaded;
+            Resized += MainWindow_Resized;
+            PositionChanged += MainWindow_PosChanged;
+            Loaded += MainWindow_Loaded;
 
             // Verificar si la aplicación está en modo de aplicación de escritorio
             if (Application.Current != null && Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -34,6 +32,10 @@ namespace QArantine.Code.QArantineGUI.Views
                 var comboBox = this.FindControl<ComboBox>("LogLvlComboBox");
                 if (comboBox != null) comboBox.SelectionChanged += LogLvlComboBox_SelectionChanged;
             }
+
+            // Enviar la ventana al fondo después de que se haya cargado
+            if (ConfigManager.GetTFConfigParamAsBool("OpenConsoleMinimized"))
+                Opened += (sender, e) => { WindowState = WindowState.Minimized; };
         }
 
         private void InitializeComponent()
@@ -43,12 +45,12 @@ namespace QArantine.Code.QArantineGUI.Views
 
         private void MainWindow_Resized(object? sender, EventArgs e)
         {
-            _windowSettingsService.SaveWindowSizeAndPos(this);
+            WindowSettingsService.SaveWindowSizeAndPos(this);
         }
 
         private void MainWindow_PosChanged(object? sender, EventArgs e)
         {
-            _windowSettingsService.SaveWindowSizeAndPos(this);
+            WindowSettingsService.SaveWindowSizeAndPos(this);
         }
 
         private void MainWindow_Loaded(object? sender, RoutedEventArgs e)

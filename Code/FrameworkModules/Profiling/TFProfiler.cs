@@ -2,12 +2,18 @@ using System.Diagnostics;
 using System.Collections.Concurrent;
 using System.Text.Json;
 
+using QArantine.Code.JsonContexts;
+using System.Runtime.InteropServices;
+
 namespace QArantine.Code.FrameworkModules.Profiling
 {
     public class TFProfiler
     {
         private static TFProfiler? _instance;
+        private bool isWindows;
         private Process currentProcess;
+        private PerformanceCounter? workingSetCounter;
+        private PerformanceCounter? privateBytesCounter;
         private ConcurrentDictionary<string, FlagMeter> flagMeters;
         private Timer? updateTimer;
         private StreamWriter? fileWriter;
@@ -19,6 +25,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
         public bool IsFileDumpActive { get; private set; } = false;
         public string BaseDumpFileName { get; set; } = "ProfMeasurements";
         public event EventHandler<ProfilingDataEventArgs>? StatsUpdated;
+
 
         public int UpdateInterval
         {
@@ -34,6 +41,14 @@ namespace QArantine.Code.FrameworkModules.Profiling
         {
             flagMeters = new ConcurrentDictionary<string, FlagMeter>();
             currentProcess = Process.GetCurrentProcess();
+            isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            #pragma warning disable CA1416
+            if (isWindows)
+            {
+                workingSetCounter = new PerformanceCounter("Process", "Working Set - Private", currentProcess.ProcessName);
+                privateBytesCounter = new PerformanceCounter("Process", "Private Bytes", currentProcess.ProcessName);
+            }
+            #pragma warning restore CA1416
             SetMeasurementEnabledState(ConfigManager.GetTFConfigParamAsBool("ProfilerActive"));
         }
 
@@ -71,7 +86,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
             }
         }
 
-        public void StartFlagMeasurement(string flagID, string category, long? callIndex = null, string? callID = null)
+        public void StartFlagMeasurement(string flagID, string category, long callIndex = -1, string? callID = null)
         {
             if (!IsMeasurementActive) return;
 
@@ -113,7 +128,7 @@ namespace QArantine.Code.FrameworkModules.Profiling
                             {
                                 foreach (var trace in traces)
                                 {
-                                    var json = JsonSerializer.Serialize(trace);
+                                    var json = JsonSerializer.Serialize(trace, TFProfilerJsonContext.Default.Object);
                                     fileWriter?.WriteLine(json + ",");
                                 }
                             }
@@ -196,12 +211,22 @@ namespace QArantine.Code.FrameworkModules.Profiling
 
         private double GetMemoryWorkingSet()
         {
-            return currentProcess.WorkingSet64;
+            #pragma warning disable CA1416
+            if (isWindows && workingSetCounter != null)
+                return workingSetCounter.NextValue();
+            else
+                return currentProcess.WorkingSet64;
+            #pragma warning restore CA1416
         }
 
         private double GetPrivateMemorySize()
         {
-            return currentProcess.PrivateMemorySize64;
+            #pragma warning disable CA1416
+            if (isWindows && privateBytesCounter != null)
+                return privateBytesCounter.NextValue();
+            else
+                return currentProcess.PrivateMemorySize64;
+            #pragma warning restore CA1416
         }
     }
 }

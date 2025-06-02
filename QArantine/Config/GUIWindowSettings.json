@@ -3,7 +3,14 @@
     "WindowTitle": "QArantineGUI",
     "Width": 800,
     "Height": 900,
-    "PosX": 344,
-    "PosY": 338
+    "PosX": 1749,
+    "PosY": 4
+  },
+  {
+    "WindowTitle": "ProfilingTools",
+    "Width": 1904,
+    "Height": 984,
+    "PosX": 2559,
+    "PosY": 6
   }
 ]

@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using Avalonia.Controls.Primitives;
-using DynamicData.Kernel;
 
 namespace QArantine.Code.FrameworkModules.VarTracking
 {
@@ -52,20 +50,21 @@ namespace QArantine.Code.FrameworkModules.VarTracking
 
         private void UpdateGatheredData(object? state)
         {
-            StartProfilerFlagMeasurement("VarTracker.UpdateGatheredData()", "QArantine");
-            List<TrackedVar> newTrackedVars = [];
-            List<string> keysToRemove = [];
-
-            lock (_updateLock)
+            QArantineProfiler.WithProfiler("VarTracker.UpdateGatheredData()", "QArantine_VarTracker", () =>
             {
-                foreach (KeyValuePair<string, Func<object>> kvp in varsValues)
-                {
-                    newTrackedVars.Add(new TrackedVar(kvp.Key, kvp.Value));
-                }
-            }
+                List<TrackedVar> newTrackedVars = [];
+                List<string> keysToRemove = [];
 
-            VarValuesUpdated?.Invoke(this, new VarTrackerUpdateEventArgs(newTrackedVars));
-            StopProfilerFlagMeasurement("VarTracker.UpdateGatheredData()", "QArantine");
+                lock (_updateLock)
+                {
+                    foreach (KeyValuePair<string, Func<object>> kvp in varsValues)
+                    {
+                        newTrackedVars.Add(new TrackedVar(kvp.Key, kvp.Value));
+                    }
+                }
+
+                VarValuesUpdated?.Invoke(this, new VarTrackerUpdateEventArgs(newTrackedVars));
+            });
         }
 
         public void SetTrackingEnabledState(bool enabled)
