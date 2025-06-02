@@ -4,8 +4,8 @@ Note: I'm developing this project coupled to a private indie videogame project w
 
 As a preview, this is how the GUI of some QArantine functionalities looks like when running:
 
-Log System and Var Tracker:
-![Log](https://github.com/user-attachments/assets/0c8494ab-81bf-4a57-b242-916e3903260e)
+Log System, Var Tracker & Input Recorder/Simulator:
+![QArantine](https://github.com/user-attachments/assets/b4b3ec08-9017-4400-b446-3b07fa4637fc)
 (Yes, the player is on the ground, that is indeed a bug in the game. Thanks QArantine <3)
 
 Performance profiler:
